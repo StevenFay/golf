@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Steven's Golf Progress</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --board: #10382A;        /* leaderboard green */
+    --board-deep: #0B2B20;
+    --paper: #F3F5EF;        /* putting-green-tinted white */
+    --ink: #1C2521;
+    --ink-soft: #56635C;
+    --line: #D8DED4;
+    --turf: #1F5C3D;
+    --flag: #C2452D;         /* flag red, used sparingly */
+    --chalk: #EFE9D6;        /* scoreboard lettering */
+    --gold: #D9A741;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: 'Inter', system-ui, sans-serif;
+    font-size: 15px;
+    line-height: 1.55;
+    min-height: 100vh;
+  }
+  .wrap { max-width: 880px; margin: 0 auto; padding: 0 20px 64px; }
+
+  /* ---- Leaderboard header ---- */
+  header {
+    background: var(--board);
+    color: var(--chalk);
+    border-bottom: 4px solid var(--gold);
+  }
+  .head-inner {
+    max-width: 880px; margin: 0 auto;
+    padding: 34px 20px 26px;
+  }
+  .eyebrow {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px; letter-spacing: 0.22em; text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 8px;
+  }
+  h1 {
+    font-family: 'Fraunces', serif;
+    font-weight: 700;
+    font-size: clamp(28px, 5vw, 40px);
+    letter-spacing: 0.01em;
+    line-height: 1.1;
+  }
+  .head-sub {
+    margin-top: 10px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    color: rgba(239,233,214,0.75);
+  }
+  .head-stats {
+    display: flex; flex-wrap: wrap; gap: 10px 28px;
+    margin-top: 20px;
+    font-family: 'IBM Plex Mono', monospace;
+  }
+  .head-stat .n {
+    font-size: 24px; font-weight: 600; color: #fff;
+  }
+  .head-stat .l {
+    font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase;
+    color: rgba(239,233,214,0.65);
+  }
+
+  /* ---- Sections ---- */
+  section { margin-top: 40px; }
+  h2 {
+    font-family: 'Fraunces', serif;
+    font-weight: 700;
+    font-size: 20px;
+    margin-bottom: 4px;
+  }
+  .sec-sub { color: var(--ink-soft); font-size: 13px; margin-bottom: 16px; }
+
+  /* ---- Focus banner ---- */
+  .focus {
+    margin-top: 28px;
+    background: #fff;
+    border: 1px solid var(--line);
+    border-left: 5px solid var(--flag);
+    border-radius: 6px;
+    padding: 16px 18px;
+  }
+  .focus .tag {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase;
+    color: var(--flag); font-weight: 600;
+  }
+  .focus p { margin-top: 6px; font-size: 14.5px; }
+  .focus .drills { margin-top: 8px; font-size: 13.5px; color: var(--ink-soft); }
+  .focus .drills strong { color: var(--ink); font-weight: 600; }
+
+  /* ---- Trend chart ---- */
+  .chart-card {
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: 18px 18px 10px;
+  }
+  .legend {
+    display: flex; flex-wrap: wrap; gap: 8px 18px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    margin-bottom: 10px;
+  }
+  .legend span { display: inline-flex; align-items: center; gap: 6px; color: var(--ink-soft); }
+  .swatch { width: 14px; height: 3px; border-radius: 2px; display: inline-block; }
+  canvas { width: 100%; height: 220px; display: block; }
+  .chart-note {
+    font-size: 12px; color: var(--ink-soft);
+    padding: 10px 2px 6px;
+  }
+
+  /* ---- Session log ---- */
+  .session {
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    margin-bottom: 14px;
+    overflow: hidden;
+  }
+  .session-head {
+    display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 14px;
+    padding: 14px 18px 0;
+  }
+  .session-date {
+    font-family: 'Fraunces', serif;
+    font-weight: 700; font-size: 17px;
+  }
+  .session-type {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px; color: var(--ink-soft);
+    letter-spacing: 0.05em;
+  }
+  .session-body { padding: 10px 18px 16px; }
+  .kv { margin-top: 8px; font-size: 13.5px; }
+  .kv .k {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase;
+    color: var(--turf); font-weight: 600;
+    display: block; margin-bottom: 2px;
+  }
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; }
+  .chip {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    padding: 4px 8px;
+    color: var(--ink);
+  }
+  .chip b { font-weight: 600; }
+
+  /* ---- States & footer ---- */
+  .state {
+    padding: 40px 0; text-align: center;
+    color: var(--ink-soft); font-size: 14px;
+  }
+  .spinner {
+    width: 22px; height: 22px; margin: 0 auto 12px;
+    border: 3px solid var(--line); border-top-color: var(--turf);
+    border-radius: 50%;
+    animation: spin 0.9s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  @media (prefers-reduced-motion: reduce) { .spinner { animation: none; } }
+  .error-box {
+    background: #FBF1EF; border: 1px solid #E4C4BC; border-radius: 6px;
+    padding: 14px 16px; font-size: 13.5px; color: #7A3226;
+  }
+  footer {
+    margin-top: 48px; padding-top: 16px;
+    border-top: 1px solid var(--line);
+    display: flex; flex-wrap: wrap; gap: 10px; justify-content: space-between; align-items: center;
+    font-size: 12px; color: var(--ink-soft);
+  }
+  button.reset {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px; letter-spacing: 0.08em;
+    background: none; border: 1px solid var(--line); border-radius: 4px;
+    color: var(--ink-soft); padding: 6px 10px; cursor: pointer;
+  }
+  button.reset:hover { border-color: var(--flag); color: var(--flag); }
+  button.reset:focus-visible { outline: 2px solid var(--turf); outline-offset: 2px; }
+
+  /* ---- SGT mini scorecard ---- */
+  .holes { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 12px; }
+  .hole {
+    width: 34px; padding: 4px 0 5px;
+    text-align: center;
+    border: 1px solid var(--line); border-radius: 4px;
+    font-family: 'IBM Plex Mono', monospace;
+  }
+  .hole .hn { font-size: 9px; color: var(--ink-soft); letter-spacing: 0.05em; }
+  .hole .hs { font-size: 14px; font-weight: 600; line-height: 1.2; }
+  .hole.par    { background: #E9F1E9; border-color: #C4D6C6; }
+  .hole.par .hs { color: var(--turf); }
+  .hole.bogey  { background: #FAF6EC; border-color: #E4D8B8; }
+  .hole.bogey .hs { color: #8A6D1F; }
+  .hole.double { background: #FBF1EF; border-color: #E4C4BC; }
+  .hole.double .hs { color: var(--flag); }
+  .hole.birdie { background: #FFF8E4; border-color: #E4CE8C; }
+  .hole.birdie .hs { color: #9A7514; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="head-inner">
+    <div class="eyebrow">Practice Log &middot; ProTee VX / GSPro &middot; SGT</div>
+    <h1>Steven&rsquo;s Golf Progress</h1>
+    <div class="head-sub" id="headSub">Loading&hellip;</div>
+    <div class="head-stats" id="headStats"></div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <div id="focusSlot"></div>
+
+  <section>
+    <h2>Trends</h2>
+    <div class="sec-sub">Session-over-session. Points fill in as more sessions are logged.</div>
+    <div class="chart-card">
+      <div class="legend">
+        <span><i class="swatch" style="background:#1F5C3D"></i>Iron contact (avg smash, 7i&ndash;9i)</span>
+        <span><i class="swatch" style="background:#C2452D"></i>Long-club miss (avg offline m, right = +)</span>
+      </div>
+      <canvas id="trend" height="220"></canvas>
+      <div class="chart-note">Goal: green line climbs toward ~1.35, red line settles toward 0.</div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Session log</h2>
+    <div class="sec-sub">Newest first. Each entry keeps the diagnosis and the drills that were set.</div>
+    <div id="sessionsSlot">
+      <div class="state"><div class="spinner"></div>Loading your sessions&hellip;</div>
+    </div>
+  </section>
+
+  <section>
+    <h2>SGT rounds</h2>
+    <div class="sec-sub">Simulator Golf Tour &mdash; competitive rounds, newest first.</div>
+    <div id="sgtSlot">
+      <div class="state"><div class="spinner"></div>Loading rounds&hellip;</div>
+    </div>
+  </section>
+
+  <footer>
+    <span>This log is stored privately &mdash; only you can see it.</span>
+    <button class="reset" id="resetBtn">Clear all log data</button>
+  </footer>
+</div>
+
+<script>
+(function () {
+  const INDEX_KEY = 'golf-session-index';
+  const SESSION_PREFIX = 'golf-session:';
+
+  // ---- Seed data: full-bag gapping session, 22 Aug 2026 ----
+  const SEED = {
+    date: '2026-08-22',
+    type: 'Full-bag gapping — 65 shots, DR to LW',
+    clubs_used: ['DR','3W','4H','4I','5I','6I','7I','8I','9I','PW','GW','SW','LW'],
+    key_stats: {
+      iron_smash: 1.30,        // avg 7i 1.33 / 8i 1.30 / 9i 1.28
+      long_offline_m: 10.3,    // avg offline DR/3W/4H/4I (right = +)
+      driver_avg_carry_m: 163,
+      wedge_smash: 1.05        // avg GW/SW/LW
+    },
+    fault_diagnosed: 'Face control at speed: swing path near-neutral but clubface hangs open on long clubs (driver face 9.2\u00B0 open vs path 0.6\u00B0) \u2192 right miss grows from 4i up. Short clubs show mild pull/draw bias. Iron contact solid; a few fat/thin lapses on partial wedges.',
+    drills_given: [
+      'Lead-hand grip check: see 2\u20132.5 knuckles at address',
+      '9-to-3 toe-up drill: half swings with 8i until straight/small draw, then 4H at 70%'
+    ],
+    notes: 'Data from spreadsheet export (no impact point / attack angle fields). Best of bag: 7i\u20139i smash 1.26\u20131.39, clean gapping. Driver was weakest club (163m avg, 66m spread). New irons incoming \u2014 re-map carries once they arrive.'
+  };
+
+  const $ = (id) => document.getElementById(id);
+
+  const SGT_INDEX_KEY = 'sgt-round-index';
+  const SGT_PREFIX = 'sgt-round:';
+
+  const SGT_SEED = {
+    date: '2026-08-24',
+    event: 'Tour Championship [Web] \u2014 Trosper GC',
+    round: 'Round 1 (front 9)',
+    par: 35, gross: 44, to_par: 9, putts: 17, fir: '2/6', gir: '0/9',
+    holes: [
+      {p:5,s:6},{p:3,s:5},{p:4,s:5},{p:3,s:4},{p:4,s:4},
+      {p:4,s:5},{p:4,s:4},{p:5,s:7},{p:3,s:4}
+    ],
+    notes: 'First competitive 9 on SGT. Driver benched \u2014 3W off tees, 4H from fairway, 3W on par 5s. Short game carried the round: holed 18ft, 13ft and two 6-footers, lagged 38ft and 26ft to tap-in. 0 GIR; nearly every long shot found rough (open-face pattern on course). Blow-ups: holes 1 and 8, both long-club misses compounding.'
+  };
+
+  async function getJSON(key) {
+    try {
+      const r = await window.storage.get(key, false);
+      return r && r.value ? JSON.parse(r.value) : null;
+    } catch (e) {
+      return null; // missing key throws — treat as absent
+    }
+  }
+
+  async function setWithRetry(key, value, tries) {
+    let lastErr = null;
+    for (let i = 0; i < (tries || 3); i++) {
+      try {
+        const r = await window.storage.set(key, value, false);
+        if (r) return true;
+      } catch (e) { lastErr = e; }
+      await new Promise(res => setTimeout(res, 400 * (i + 1)));
+    }
+    if (lastErr) console.warn('storage.set failed after retries:', key, lastErr);
+    return false;
+  }
+
+  // Returns { index, saved } — never throws. If saving fails, the caller
+  // renders the seed from memory and we retry on the next open.
+  async function seedIfNeeded(indexKey, prefix, seed) {
+    let index = await getJSON(indexKey);
+    if (!Array.isArray(index)) index = [];
+    if (index.includes(seed.date)) return { index, saved: true };
+    const okItem = await setWithRetry(prefix + seed.date, JSON.stringify(seed));
+    if (!okItem) return { index, saved: false };
+    const newIndex = index.concat([seed.date]).sort();
+    const okIndex = await setWithRetry(indexKey, JSON.stringify(newIndex));
+    return okIndex ? { index: newIndex, saved: true } : { index, saved: false };
+  }
+
+  async function loadItems(index, prefix) {
+    const items = [];
+    for (const d of index) {
+      const s = await getJSON(prefix + d);
+      if (s) items.push(s);
+    }
+    items.sort((a, b) => a.date.localeCompare(b.date));
+    return items;
+  }
+
+  function fmtDate(iso) {
+    const [y, m, d] = iso.split('-').map(Number);
+    const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    return d + ' ' + months[m - 1] + ' ' + y;
+  }
+
+  function renderHeader(sessions) {
+    const latest = sessions[sessions.length - 1];
+    $('headSub').textContent = sessions.length + ' session' + (sessions.length === 1 ? '' : 's') +
+      ' logged \u00B7 last: ' + fmtDate(latest.date);
+    const ks = latest.key_stats || {};
+    const stats = [
+      [ks.iron_smash != null ? ks.iron_smash.toFixed(2) : '\u2013', 'Iron smash'],
+      [ks.long_offline_m != null ? (ks.long_offline_m > 0 ? '+' : '') + ks.long_offline_m + 'm' : '\u2013', 'Long-club miss'],
+      [ks.driver_avg_carry_m != null ? ks.driver_avg_carry_m + 'm' : '\u2013', 'Driver carry']
+    ];
+    $('headStats').innerHTML = stats.map(([n, l]) =>
+      '<div class="head-stat"><div class="n">' + n + '</div><div class="l">' + l + '</div></div>'
+    ).join('');
+  }
+
+  function renderFocus(sessions) {
+    const latest = sessions[sessions.length - 1];
+    if (!latest.fault_diagnosed) return;
+    const drills = (latest.drills_given || []).map(d => '<strong>' + esc(d) + '</strong>').join(' &nbsp;\u00B7&nbsp; ');
+    $('focusSlot').innerHTML =
+      '<div class="focus">' +
+        '<div class="tag">Current focus</div>' +
+        '<p>' + esc(latest.fault_diagnosed) + '</p>' +
+        (drills ? '<div class="drills">Drills: ' + drills + '</div>' : '') +
+      '</div>';
+  }
+
+  function esc(s) {
+    return String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+  }
+
+  function renderSessions(sessions) {
+    const html = sessions.slice().reverse().map(s => {
+      const ks = s.key_stats || {};
+      const chips = [];
+      if (ks.iron_smash != null) chips.push('<span class="chip">iron smash <b>' + ks.iron_smash.toFixed(2) + '</b></span>');
+      if (ks.long_offline_m != null) chips.push('<span class="chip">long miss <b>' + (ks.long_offline_m > 0 ? '+' : '') + ks.long_offline_m + 'm</b></span>');
+      if (ks.driver_avg_carry_m != null) chips.push('<span class="chip">driver <b>' + ks.driver_avg_carry_m + 'm</b></span>');
+      if (ks.wedge_smash != null) chips.push('<span class="chip">wedge smash <b>' + ks.wedge_smash.toFixed(2) + '</b></span>');
+      return (
+        '<div class="session">' +
+          '<div class="session-head">' +
+            '<span class="session-date">' + fmtDate(s.date) + '</span>' +
+            '<span class="session-type">' + esc(s.type || '') + '</span>' +
+          '</div>' +
+          '<div class="session-body">' +
+            '<div class="kv"><span class="k">Diagnosis</span>' + esc(s.fault_diagnosed || '\u2014') + '</div>' +
+            ((s.drills_given && s.drills_given.length)
+              ? '<div class="kv"><span class="k">Drills</span>' + s.drills_given.map(esc).join(' \u00B7 ') + '</div>' : '') +
+            (s.notes ? '<div class="kv"><span class="k">Notes</span>' + esc(s.notes) + '</div>' : '') +
+            (chips.length ? '<div class="chips">' + chips.join('') + '</div>' : '') +
+          '</div>' +
+        '</div>'
+      );
+    }).join('');
+    $('sessionsSlot').innerHTML = html || '<div class="state">No sessions yet. Share shot data with Claude to log one.</div>';
+  }
+
+  function renderChart(sessions) {
+    const canvas = $('trend');
+    const dpr = window.devicePixelRatio || 1;
+    const cssW = canvas.clientWidth || 800;
+    const cssH = 220;
+    canvas.width = cssW * dpr;
+    canvas.height = cssH * dpr;
+    const ctx = canvas.getContext('2d');
+    ctx.scale(dpr, dpr);
+    ctx.clearRect(0, 0, cssW, cssH);
+
+    const padL = 40, padR = 40, padT = 16, padB = 30;
+    const plotW = cssW - padL - padR, plotH = cssH - padT - padB;
+
+    const pts = sessions.map(s => ({
+      date: s.date,
+      smash: s.key_stats ? s.key_stats.iron_smash : null,
+      off: s.key_stats ? s.key_stats.long_offline_m : null
+    }));
+    const n = pts.length;
+    const x = (i) => n === 1 ? padL + plotW / 2 : padL + (plotW * i) / (n - 1);
+
+    // scales: smash 0.9–1.5 (left), offline -20..+40 (right)
+    const ySmash = (v) => padT + plotH * (1 - (v - 0.9) / (1.5 - 0.9));
+    const yOff = (v) => padT + plotH * (1 - (v + 20) / 60);
+
+    // gridlines
+    ctx.strokeStyle = '#E4E8E0'; ctx.lineWidth = 1;
+    ctx.font = '10px "IBM Plex Mono", monospace';
+    [1.0, 1.2, 1.4].forEach(v => {
+      const y = ySmash(v);
+      ctx.beginPath(); ctx.moveTo(padL, y); ctx.lineTo(cssW - padR, y); ctx.stroke();
+      ctx.fillStyle = '#1F5C3D'; ctx.textAlign = 'right';
+      ctx.fillText(v.toFixed(1), padL - 6, y + 3);
+    });
+    [0, 20].forEach(v => {
+      const y = yOff(v);
+      ctx.fillStyle = '#C2452D'; ctx.textAlign = 'left';
+      ctx.fillText((v > 0 ? '+' : '') + v + 'm', cssW - padR + 6, y + 3);
+    });
+    // zero-offline reference line
+    ctx.strokeStyle = 'rgba(194,69,45,0.25)';
+    ctx.setLineDash([4, 4]);
+    ctx.beginPath(); ctx.moveTo(padL, yOff(0)); ctx.lineTo(cssW - padR, yOff(0)); ctx.stroke();
+    ctx.setLineDash([]);
+
+    function drawSeries(get, yFn, color) {
+      const valid = pts.map((p, i) => ({ v: get(p), i })).filter(p => p.v != null);
+      if (!valid.length) return;
+      ctx.strokeStyle = color; ctx.lineWidth = 2;
+      ctx.beginPath();
+      valid.forEach((p, k) => {
+        const px = x(p.i), py = yFn(p.v);
+        k === 0 ? ctx.moveTo(px, py) : ctx.lineTo(px, py);
+      });
+      if (valid.length > 1) ctx.stroke();
+      valid.forEach(p => {
+        const px = x(p.i), py = yFn(p.v);
+        ctx.fillStyle = color;
+        ctx.beginPath(); ctx.arc(px, py, 4, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = '#fff';
+        ctx.beginPath(); ctx.arc(px, py, 1.8, 0, Math.PI * 2); ctx.fill();
+      });
+    }
+    drawSeries(p => p.smash, ySmash, '#1F5C3D');
+    drawSeries(p => p.off, yOff, '#C2452D');
+
+    // x labels
+    ctx.fillStyle = '#56635C'; ctx.textAlign = 'center';
+    pts.forEach((p, i) => {
+      const [, m, d] = p.date.split('-');
+      ctx.fillText(d + '/' + m, x(i), cssH - 10);
+    });
+  }
+
+  function renderSGT(rounds) {
+    if (!rounds.length) {
+      $('sgtSlot').innerHTML = '<div class="state">No SGT rounds yet. Share a scorecard with Claude to log one.</div>';
+      return;
+    }
+    const html = rounds.slice().reverse().map(r => {
+      const toPar = r.to_par > 0 ? '+' + r.to_par : (r.to_par === 0 ? 'E' : String(r.to_par));
+      const holes = (r.holes || []).map((h, i) => {
+        const d = h.s - h.p;
+        const cls = d <= -1 ? 'birdie' : d === 0 ? 'par' : d === 1 ? 'bogey' : 'double';
+        return '<div class="hole ' + cls + '"><div class="hn">' + (i + 1) + '</div><div class="hs">' + h.s + '</div></div>';
+      }).join('');
+      const chips = [
+        '<span class="chip">gross <b>' + r.gross + ' (' + toPar + ')</b></span>',
+        r.putts != null ? '<span class="chip">putts <b>' + r.putts + '</b></span>' : '',
+        r.fir ? '<span class="chip">FIR <b>' + esc(r.fir) + '</b></span>' : '',
+        r.gir ? '<span class="chip">GIR <b>' + esc(r.gir) + '</b></span>' : ''
+      ].join('');
+      return (
+        '<div class="session">' +
+          '<div class="session-head">' +
+            '<span class="session-date">' + fmtDate(r.date) + '</span>' +
+            '<span class="session-type">' + esc(r.event || '') + (r.round ? ' \u00B7 ' + esc(r.round) : '') + '</span>' +
+          '</div>' +
+          '<div class="session-body">' +
+            (holes ? '<div class="holes">' + holes + '</div>' : '') +
+            (r.notes ? '<div class="kv"><span class="k">Round notes</span>' + esc(r.notes) + '</div>' : '') +
+            (chips ? '<div class="chips">' + chips + '</div>' : '') +
+          '</div>' +
+        '</div>'
+      );
+    }).join('');
+    $('sgtSlot').innerHTML = html;
+  }
+
+  async function boot() {
+    let sessions = [];
+    let rounds = [];
+    let saved = true;
+    try {
+      const res = await seedIfNeeded(INDEX_KEY, SESSION_PREFIX, SEED);
+      saved = res.saved;
+      sessions = await loadItems(res.index, SESSION_PREFIX);
+    } catch (err) {
+      console.warn('Storage unavailable, using in-memory data:', err);
+      saved = false;
+    }
+    try {
+      const resSgt = await seedIfNeeded(SGT_INDEX_KEY, SGT_PREFIX, SGT_SEED);
+      saved = saved && resSgt.saved;
+      rounds = await loadItems(resSgt.index, SGT_PREFIX);
+    } catch (err) {
+      console.warn('Storage unavailable for SGT rounds:', err);
+      saved = false;
+    }
+    if (!sessions.some(s => s.date === SEED.date)) sessions.push(SEED);
+    sessions.sort((a, b) => a.date.localeCompare(b.date));
+    if (!rounds.some(r => r.date === SGT_SEED.date)) rounds.push(SGT_SEED);
+    rounds.sort((a, b) => a.date.localeCompare(b.date));
+    try {
+      renderHeader(sessions);
+      renderFocus(sessions);
+      renderSessions(sessions);
+      renderSGT(rounds);
+      renderChart(sessions);
+      window.addEventListener('resize', () => renderChart(sessions));
+      if (!saved) {
+        $('sessionsSlot').insertAdjacentHTML('beforebegin',
+          '<div class="error-box" style="margin-bottom:14px">Saving to your private log didn\u2019t work just now \u2014 today\u2019s session is shown from a local copy and will be saved automatically next time you open this dashboard.</div>');
+      }
+    } catch (err) {
+      console.error('Dashboard render error:', err);
+      $('sessionsSlot').innerHTML =
+        '<div class="error-box">The log couldn\u2019t be displayed right now. Reopen this dashboard to try again \u2014 your saved sessions are unaffected.</div>';
+      $('headSub').textContent = '';
+    }
+  }
+
+  $('resetBtn').addEventListener('click', async () => {
+    if (!confirm('Delete every logged session and SGT round? This can\u2019t be undone.')) return;
+    try {
+      const index = (await getJSON(INDEX_KEY)) || [];
+      for (const d of index) {
+        try { await window.storage.delete(SESSION_PREFIX + d, false); } catch (e) {}
+      }
+      try { await window.storage.delete(INDEX_KEY, false); } catch (e) {}
+      const sgtIndex = (await getJSON(SGT_INDEX_KEY)) || [];
+      for (const d of sgtIndex) {
+        try { await window.storage.delete(SGT_PREFIX + d, false); } catch (e) {}
+      }
+      try { await window.storage.delete(SGT_INDEX_KEY, false); } catch (e) {}
+      location.reload();
+    } catch (err) {
+      alert('Couldn\u2019t clear the log. Try again in a moment.');
+    }
+  });
+
+  boot();
+})();
+</script>
+</body>
+</html>
