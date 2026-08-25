@@ -270,8 +270,9 @@
   const INDEX_KEY = 'golf-session-index';
   const SESSION_PREFIX = 'golf-session:';
 
-  // ---- Seed data: full-bag gapping session, 22 Aug 2026 ----
-  const SEED = {
+  // ---- Seed data: practice sessions ----
+  const SESSION_SEEDS = [
+  {
     date: '2026-08-22',
     type: 'Full-bag gapping — 65 shots, DR to LW',
     clubs_used: ['DR','3W','4H','4I','5I','6I','7I','8I','9I','PW','GW','SW','LW'],
@@ -287,7 +288,23 @@
       '9-to-3 toe-up drill: half swings with 8i until straight/small draw, then 4H at 70%'
     ],
     notes: 'Data from spreadsheet export (no impact point / attack angle fields). Best of bag: 7i\u20139i smash 1.26\u20131.39, clean gapping. Driver was weakest club (163m avg, 66m spread). New irons incoming \u2014 re-map carries once they arrive.'
-  };
+  },
+  {
+    date: '2026-08-25',
+    type: '7-iron block practice — 16 shots (grip-change trial)',
+    clubs_used: ['7I'],
+    key_stats: {
+      iron_smash: 1.25         // 7i session average (min 1.05, max 1.35)
+    },
+    fault_diagnosed: 'Grip change to 2.5 knuckles mid-session \u2192 classic transition dip: faces 7\u201310\u00B0 open, closure rate down (~1,850 vs 2,400\u00B0/s on good swings), dynamic loft up to 32\u201336\u00B0, club speed \u22125 km/h \u2014 steering/holding off release with the unfamiliar grip, not a failed grip. Proof of concept either side: best shot face 0.4\u00B0 closed, baby draw, smash 1.35, 139.9m; two new-grip shots at face 0.9\u00B0 and 1.7\u00B0 flew near dead straight.',
+    drills_given: [
+      'Groove new grip at 60\u201370%: 15\u201320 min of 9-to-3 toe-up before any full swings',
+      'Sim targets: face 0\u20133\u00B0 open, side spin < 500 rpm; ignore carry',
+      'One ball per 45\u201360s, regrip fresh each shot \u2014 no machine-gunning'
+    ],
+    notes: 'Avg carry 115.9m, offline avg 18.7m R, spin axis avg 13.4\u00B0 R. Contact scattered: impact height \u221216 to +21 mm. Dynamic lie averaged ~7\u00B0 toe-down (adds right bias) \u2014 flagged for fitting review when new irons arrive.'
+  }
+  ];
 
   const $ = (id) => document.getElementById(id);
 
@@ -530,9 +547,13 @@
     let rounds = [];
     let saved = true;
     try {
-      const res = await seedIfNeeded(INDEX_KEY, SESSION_PREFIX, SEED);
-      saved = res.saved;
-      sessions = await loadItems(res.index, SESSION_PREFIX);
+      let sessIndex = [];
+      for (const seed of SESSION_SEEDS) {
+        const res = await seedIfNeeded(INDEX_KEY, SESSION_PREFIX, seed);
+        saved = saved && res.saved;
+        sessIndex = res.index;
+      }
+      sessions = await loadItems(sessIndex, SESSION_PREFIX);
     } catch (err) {
       console.warn('Storage unavailable, using in-memory data:', err);
       saved = false;
@@ -545,7 +566,9 @@
       console.warn('Storage unavailable for SGT rounds:', err);
       saved = false;
     }
-    if (!sessions.some(s => s.date === SEED.date)) sessions.push(SEED);
+    for (const seed of SESSION_SEEDS) {
+      if (!sessions.some(s => s.date === seed.date)) sessions.push(seed);
+    }
     sessions.sort((a, b) => a.date.localeCompare(b.date));
     if (!rounds.some(r => r.date === SGT_SEED.date)) rounds.push(SGT_SEED);
     rounds.sort((a, b) => a.date.localeCompare(b.date));
