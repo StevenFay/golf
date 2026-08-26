@@ -96,35 +96,90 @@ def write_csv(path, rows):
     print(f"  wrote {os.path.relpath(path, ROOT)} ({len(rows)} rows)")
 
 
+def check_round_join(shots):
+    """Warn if round shots don't line up with rounds.json.
+
+    `hole` is only meaningful for context=round, and it must match a hole
+    that actually exists in that date's round — otherwise the join silently
+    drops shots and nobody notices.
+    """
+    path = os.path.join(DATA, "rounds.json")
+    if not os.path.exists(path):
+        return
+    with open(path) as f:
+        rounds = json.load(f).get("rounds", [])
+    by_date = {r["date"]: {h["hole"] for h in r.get("holes", [])} for r in rounds}
+
+    problems = []
+    for r in shots:
+        ctx, hole = (r.get("context") or "range"), (r.get("hole") or "").strip()
+        if ctx == "round":
+            if not hole:
+                problems.append(f"{r['session_date']} shot {r['shot_no']}: "
+                                f"context=round but no hole")
+            elif r["session_date"] not in by_date:
+                problems.append(f"{r['session_date']}: round shots but no "
+                                f"matching round in rounds.json")
+            elif int(float(hole)) not in by_date[r["session_date"]]:
+                problems.append(f"{r['session_date']} hole {hole}: not in "
+                                f"that round's holes")
+        elif hole:
+            problems.append(f"{r['session_date']} shot {r['shot_no']}: "
+                            f"hole set but context={ctx}")
+
+    for p in sorted(set(problems))[:10]:
+        print(f"  WARNING {p}")
+    if len(set(problems)) > 10:
+        print(f"  ... and {len(set(problems)) - 10} more")
+
+
 def main():
     shots = load_shots()
     dates = sorted({r["session_date"] for r in shots})
+    contexts = sorted({r.get("context") or "range" for r in shots})
     print(f"Loaded {len(shots)} shots across {len(dates)} sessions "
-          f"({dates[0]} to {dates[-1]})")
+          f"({dates[0]} to {dates[-1]}); contexts: {', '.join(contexts)}")
 
-    # All-time plus the most recent session.
-    summary = summarise(shots, "all_time")
+    # Gapping and club stats come from RANGE shots only. On-course shots come
+    # from bad lies, awkward yardages and adrenaline — pooling them would drag
+    # every carry average down and widen every band.
+    rng = [r for r in shots if (r.get("context") or "range") == "range"]
+    rnd = [r for r in shots if r.get("context") == "round"]
+    if rnd:
+        print(f"  {len(rng)} range shots / {len(rnd)} round shots "
+              f"— gapping uses range only")
+    check_round_join(shots)
+
+    # All-time plus the most recent session (range only).
+    summary = summarise(rng, "all_time_range")
     latest = dates[-1]
-    summary += summarise([r for r in shots if r["session_date"] == latest], latest)
+    summary += summarise([r for r in rng if r["session_date"] == latest], latest)
+    # On-course shots summarised separately so they can be compared, not merged.
+    if rnd:
+        summary += summarise(rnd, "all_time_round")
     write_csv(os.path.join(BUILD, "club_summary.csv"), summary)
 
-    # Per-club per-session averages, for trend lines.
+    # Per-club per-session averages, for trend lines. Context kept as a column
+    # so a chart can filter or split on it rather than silently averaging both.
     trend = []
     for d in dates:
-        for rec in summarise([r for r in shots if r["session_date"] == d], d):
-            trend.append({"session_date": d, "club": rec["club"],
-                          "shots": rec["shots"], "carry_avg": rec["carry_avg"],
-                          "ball_avg": rec["ball_avg"], "smash_avg": rec["smash_avg"],
-                          "offline_avg": rec["offline_avg"],
-                          "face_avg": rec["face_avg"]})
+        for ctx, pool in (("range", rng), ("round", rnd)):
+            day = [r for r in pool if r["session_date"] == d]
+            for rec in summarise(day, d):
+                trend.append({"session_date": d, "context": ctx,
+                              "club": rec["club"],
+                              "shots": rec["shots"], "carry_avg": rec["carry_avg"],
+                              "ball_avg": rec["ball_avg"], "smash_avg": rec["smash_avg"],
+                              "offline_avg": rec["offline_avg"],
+                              "face_avg": rec["face_avg"]})
     write_csv(os.path.join(BUILD, "club_trend.csv"), trend)
 
-    # Dashboard seed: BAG from the full-bag session, DEEP from the newest 7I block.
+    # Dashboard seed: BAG from the widest range session, DEEP from newest 7I block.
     bag_date = max(
         dates,
-        key=lambda d: len({r["club"] for r in shots if r["session_date"] == d})
+        key=lambda d: len({r["club"] for r in rng if r["session_date"] == d})
     )
-    bag_rows = summarise([r for r in shots if r["session_date"] == bag_date], bag_date)
+    bag_rows = summarise([r for r in rng if r["session_date"] == bag_date], bag_date)
     bag = [{"club": r["club"], "n": r["shots"],
             "carry": [r["carry_min"], r["carry_avg"], r["carry_max"]],
             "ball": [r["ball_min"], r["ball_avg"], r["ball_max"]],
@@ -132,7 +187,7 @@ def main():
             "smash": [r["smash_min"], r["smash_avg"], r["smash_max"]],
             "off": r["offline_avg"], "back": r["backspin_avg"]} for r in bag_rows]
 
-    seven = [r for r in shots if r["club"] == "7I"]
+    seven = [r for r in rng if r["club"] == "7I"]
     seven_latest = max({r["session_date"] for r in seven}) if seven else None
     deep_rows = [r for r in seven if r["session_date"] == seven_latest]
     deep = summarise(deep_rows, seven_latest)[0] if deep_rows else {}
