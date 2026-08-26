@@ -181,7 +181,7 @@
   </section>
 
   <footer>
-    <span>Stored privately &mdash; only you can see this log.</span>
+    <span id="privacyNote">Stored privately &mdash; only you can see this log.</span>
     <span><button class="btn" id="exportBtn">Export JSON</button> <button class="btn" id="resetBtn">Clear log</button></span>
   </footer>
 </div>
@@ -276,8 +276,13 @@
   ];
 
   // ---------- storage ----------
-  async function getJSON(k){try{const r=await window.storage.get(k,false);return r&&r.value?JSON.parse(r.value):null}catch(e){return null}}
-  async function setRetry(k,v,tries){let last=null;for(let i=0;i<(tries||3);i++){try{const r=await window.storage.set(k,v,false);if(r)return true}catch(e){last=e}await new Promise(r=>setTimeout(r,400*(i+1)))}if(last)console.warn('set failed',k,last);return false}
+  const HAS_STORAGE = (typeof window !== 'undefined' && window.storage &&
+                       typeof window.storage.get === 'function');
+
+  async function getJSON(k){
+    if(!HAS_STORAGE) return null;try{const r=await window.storage.get(k,false);return r&&r.value?JSON.parse(r.value):null}catch(e){return null}}
+  async function setRetry(k,v,tries){
+    if(!HAS_STORAGE) return false;let last=null;for(let i=0;i<(tries||3);i++){try{const r=await window.storage.set(k,v,false);if(r)return true}catch(e){last=e}await new Promise(r=>setTimeout(r,400*(i+1)))}if(last)console.warn('set failed',k,last);return false}
   async function seed(idxKey,pre,item){
     let idx=await getJSON(idxKey); if(!Array.isArray(idx))idx=[];
     if(idx.includes(item.date))return{index:idx,saved:true};
@@ -434,7 +439,7 @@
     try{
       head(SESS,ROUNDS); focus(); face(); deep(); bag(); ladder(); sessions(SESS); sgt(ROUNDS); chart(SESS);
       window.addEventListener('resize',()=>chart(SESS));
-      if(!saved) $('noticeSlot').innerHTML='<div class="errbox" style="margin-top:24px">Saving to your private log didn\u2019t work just now \u2014 showing a local copy. It\u2019ll save automatically next time you open this.</div>';
+      if(!saved && HAS_STORAGE) $('noticeSlot').innerHTML='<div class="errbox" style="margin-top:24px">Saving to your private log didn\u2019t work just now \u2014 showing a local copy. It\u2019ll save automatically next time you open this.</div>';
     }catch(e){console.error(e);
       $('sessSlot').innerHTML='<div class="errbox">Couldn\u2019t display the log. Reopen to try again \u2014 saved data is unaffected.</div>';}
   }
@@ -452,6 +457,12 @@
         try{await window.storage.delete(ik,false)}catch(e){}}
       location.reload()}catch(e){alert('Couldn\u2019t clear the log. Try again shortly.')}
   });
+
+  if(!HAS_STORAGE){
+    const el=$('privacyNote');
+    if(el) el.textContent='Read-only view \u2014 showing the latest published snapshot.';
+    const rb=$('resetBtn'); if(rb) rb.style.display='none';
+  }
 
   boot();
 })();
