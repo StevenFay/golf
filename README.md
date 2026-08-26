@@ -36,6 +36,8 @@ Everything in `build/` is derived. If it disagrees with `shots.csv`,
 | `shot_no` | Shot number as shown by the launch monitor. Gaps are fine. |
 | `time` | `HH:MM:SS`, 24h. |
 | `club` | `DR 3W 4H 4I 5I 6I 7I 8I 9I PW GW SW LW` |
+| `context` | `range` or `round`. Range = practice/sim. Round = played golf. **Gapping and club averages use `range` only** — on-course shots come from bad lies, awkward yardages and adrenaline, and pooling them drags every carry average down and widens every band. |
+| `hole` | Hole number, for `context=round` only. Joins to the matching date's round in `rounds.json`. Blank for range shots. |
 | `carry_m` `total_m` `offline_m` | Metres. Offline: **positive = right**, negative = left. |
 | `club_speed_kmh` `ball_speed_kmh` | km/h. |
 | `smash` | Ball speed ÷ club speed. |
@@ -59,12 +61,23 @@ transcription risk than a direct export.
 
 ## Adding a session
 
-**From a launch monitor export:**
+**From a launch monitor export (practice):**
 
 ```bash
 python3 scripts/append.py 2026-09-01 /path/to/export.csv
 python3 scripts/build.py
 ```
+
+**From a played round:**
+
+```bash
+python3 scripts/append.py 2026-09-01 round.csv --context round --hole 7
+# or include a 'hole' column in the CSV and omit --hole
+```
+
+Round imports must carry a hole number — `append.py` refuses the import
+without one, and `build.py` warns if a hole doesn't exist in that date's
+round in `rounds.json`, so the join can't silently drop shots.
 
 `append.py` maps common column-name variants onto the schema, refuses to
 write if `session_date` already exists (pass `--force` to override), and
@@ -86,7 +99,11 @@ print(sum(float(r['face_angle_deg']) for r in seven) / len(seven))
 ```
 
 Or `python3 scripts/build.py` and read `build/club_trend.csv`, which has
-per-club per-session averages ready to chart.
+per-club per-session averages ready to chart, with `context` as a column so
+charts can split range from round rather than averaging both together.
+`build/club_summary.csv` carries scopes `all_time_range`, `all_time_round`
+and the latest session, so on-course and practice numbers sit side by side
+without ever being merged.
 
 ## Current focus
 
