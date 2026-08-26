@@ -21,7 +21,8 @@ import sys
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SHOTS = os.path.join(ROOT, "data", "shots.csv")
 
-SCHEMA = ["session_date", "shot_no", "time", "club", "carry_m", "total_m",
+SCHEMA = ["session_date", "shot_no", "time", "club", "context", "hole",
+          "carry_m", "total_m",
           "offline_m", "club_speed_kmh", "ball_speed_kmh", "smash",
           "spin_axis_deg", "back_spin_rpm", "side_spin_rpm", "launch_angle_deg",
           "launch_dir_deg", "face_angle_deg", "swing_path_deg", "face_to_path_deg",
@@ -52,6 +53,7 @@ ALIASES = {
     "dynamicloft": "dyn_loft_deg", "loft": "dyn_loft_deg",
     "impactwidth": "impact_w_mm", "impactheight": "impact_h_mm",
     "lie": "lie_deg", "closurerate": "closure_rate_dps", "closure": "closure_rate_dps",
+    "hole": "hole", "holenumber": "hole", "holeno": "hole", "context": "context",
 }
 
 
@@ -85,6 +87,12 @@ def main():
     ap.add_argument("session_date", help="ISO date, e.g. 2026-09-01")
     ap.add_argument("input_csv")
     ap.add_argument("--source", default="csv_export")
+    ap.add_argument("--context", default="range", choices=["range", "round"],
+                    help="range = practice/sim session, round = played golf. "
+                         "Gapping averages only use range shots.")
+    ap.add_argument("--hole", default="",
+                    help="Hole number for a single-hole import (context=round). "
+                         "Otherwise supply a 'hole' column in the input CSV.")
     ap.add_argument("--force", action="store_true",
                     help="replace rows if this session_date already exists")
     args = ap.parse_args()
@@ -110,6 +118,9 @@ def main():
             row = {c: "" for c in SCHEMA}
             row["session_date"] = args.session_date
             row["source"] = args.source
+            row["context"] = args.context
+            if args.hole:
+                row["hole"] = args.hole
             for src_col, dest in mapping.items():
                 row[dest] = (src.get(src_col) or "").strip()
             if any(row[c] for c in ("carry_m", "ball_speed_kmh", "club")):
@@ -117,6 +128,16 @@ def main():
 
     if not new_rows:
         sys.exit("No shot rows found in the input file.")
+
+    if args.context == "round":
+        missing = [r for r in new_rows if not (r.get("hole") or "").strip()]
+        if missing:
+            sys.exit(f"{len(missing)} round shots have no hole number. "
+                     f"Pass --hole N, or include a 'hole' column, so the rows "
+                     f"can join to rounds.json.")
+    else:
+        for r in new_rows:
+            r["hole"] = ""
 
     # Load current file, dropping the target date if replacing.
     old = []
