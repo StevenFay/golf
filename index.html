@@ -125,6 +125,16 @@
   </section>
 
   <section>
+    <h2>Face angle &mdash; the fault we&rsquo;re fixing</h2>
+    <div class="sub">Session average and share of shots inside the 0&ndash;3&deg; target band.</div>
+    <div class="tcard"><div class="scroll"><table>
+      <thead><tr><th>Session</th><th>Block</th><th>Shots</th><th>Face avg</th><th>In band</th><th>Closed</th><th>Side spin</th></tr></thead>
+      <tbody id="faceSlot"></tbody>
+    </table></div>
+    <div class="foot-note">Lower average and more closed faces = the clubface is squaring in time. This is the headline metric.</div></div>
+  </section>
+
+  <section>
     <h2>Latest block deep dive</h2>
     <div class="sub" id="deepSub">Most recent full block &mdash; contact, face and delivery.</div>
     <div class="tcard"><div class="metrics" id="deepSlot"></div>
@@ -191,6 +201,8 @@
   const S_INDEX='golf-session-index', S_PRE='golf-session:';
   const G_INDEX='sgt-round-index', G_PRE='sgt-round:';
   const $=id=>document.getElementById(id);
+  // Render steps are isolated: one failing section must never blank the rest.
+  function safe(name, fn){ try{ fn(); }catch(e){ console.error(name+' failed:', e); } }
   const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 
   // ---------- static reference data ----------
@@ -437,7 +449,9 @@
     for(const r of SGT_SEEDS) if(!ROUNDS.some(x=>x.date===r.date)) ROUNDS.push(r);
     SESS.sort((a,b)=>a.date.localeCompare(b.date)); ROUNDS.sort((a,b)=>a.date.localeCompare(b.date));
     try{
-      head(SESS,ROUNDS); focus(); face(); deep(); bag(); ladder(); sessions(SESS); sgt(ROUNDS); chart(SESS);
+      safe('head',()=>head(SESS,ROUNDS)); safe('focus',focus); safe('face',face);
+      safe('deep',deep); safe('bag',bag); safe('ladder',ladder);
+      safe('sessions',()=>sessions(SESS)); safe('sgt',()=>sgt(ROUNDS)); safe('chart',()=>chart(SESS));
       window.addEventListener('resize',()=>chart(SESS));
       if(!saved && HAS_STORAGE) $('noticeSlot').innerHTML='<div class="errbox" style="margin-top:24px">Saving to your private log didn\u2019t work just now \u2014 showing a local copy. It\u2019ll save automatically next time you open this.</div>';
     }catch(e){console.error(e);
