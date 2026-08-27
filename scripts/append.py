@@ -21,7 +21,7 @@ import sys
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SHOTS = os.path.join(ROOT, "data", "shots.csv")
 
-SCHEMA = ["session_date", "shot_no", "time", "club", "context", "hole",
+SCHEMA = ["session_date", "session_id", "shot_no", "time", "club", "context", "hole",
           "carry_m", "total_m",
           "offline_m", "club_speed_kmh", "ball_speed_kmh", "smash",
           "spin_axis_deg", "back_spin_rpm", "side_spin_rpm", "launch_angle_deg",
@@ -75,11 +75,13 @@ def map_columns(fieldnames):
     return mapping, unknown
 
 
-def existing_dates():
+def existing_sessions():
+    """Existing session_ids — NOT dates. Two sessions can share a day
+    (e.g. a warm-up block and then an SGT round)."""
     if not os.path.exists(SHOTS):
         return set()
     with open(SHOTS, newline="") as f:
-        return {r["session_date"] for r in csv.DictReader(f)}
+        return {r.get("session_id") or r["session_date"] for r in csv.DictReader(f)}
 
 
 def main():
@@ -92,6 +94,14 @@ def main():
                     help="practice = training block; sgt = Simulator Golf Tour round; "
                          "play = casual round; drill = drill reps (EXCLUDED from all "
                          "stats, since partial swings would corrupt the averages).")
+    ap.add_argument("--description", default="",
+                    help="Human description of the session, e.g. "
+                         "'SGT Tour Championship Round 1 front nine' or "
+                         "'Keperra West casual with Amanda'. Required \u2014 a session "
+                         "without one is unidentifiable a month later.")
+    ap.add_argument("--suffix", default="",
+                    help="Disambiguator when there is more than one session of the "
+                         "same context on one day, e.g. 'r2'.")
     ap.add_argument("--hole", default="",
                     help="Hole number for a single-hole import (sgt/play contexts). "
                          "Otherwise supply a 'hole' column in the input CSV.")
@@ -102,10 +112,19 @@ def main():
     if not re.fullmatch(r"\d{4}-\d{2}-\d{2}", args.session_date):
         sys.exit(f"session_date must be YYYY-MM-DD, got {args.session_date!r}")
 
-    dates = existing_dates()
-    if args.session_date in dates and not args.force:
-        sys.exit(f"{args.session_date} already exists in shots.csv. "
-                 f"Pass --force to replace those rows.")
+    if not args.description.strip():
+        sys.exit("--description is required. Give the session a human label, e.g.\n"
+                 "  --description 'SGT Tour Championship Round 1 front nine'\n"
+                 "  --description 'Keperra West casual with Amanda'")
+
+    session_id = f"{args.session_date}-{args.context}"
+    if args.suffix:
+        session_id += f"-{args.suffix}"
+
+    if session_id in existing_sessions() and not args.force:
+        sys.exit(f"Session {session_id} already exists in shots.csv. "
+                 f"Pass --force to replace it, or --suffix to add a separate "
+                 f"session on the same day.")
 
     with open(args.input_csv, newline="") as f:
         reader = csv.DictReader(f)
@@ -119,6 +138,7 @@ def main():
         for src in reader:
             row = {c: "" for c in SCHEMA}
             row["session_date"] = args.session_date
+            row["session_id"] = session_id
             row["source"] = args.source
             row["context"] = args.context
             if args.hole:
@@ -147,10 +167,11 @@ def main():
         shutil.copy(SHOTS, SHOTS + ".bak")
         with open(SHOTS, newline="") as f:
             old = [r for r in csv.DictReader(f)
-                   if not (args.force and r["session_date"] == args.session_date)]
+                   if not (args.force and r.get("session_id") == session_id)]
 
     combined = old + new_rows
-    combined.sort(key=lambda r: (r["session_date"], str(r.get("time") or "")))
+    combined.sort(key=lambda r: (r["session_date"], r.get("session_id") or "",
+                                 str(r.get("time") or "")))
 
     with open(SHOTS, "w", newline="") as f:
         w = csv.DictWriter(f, fieldnames=SCHEMA, restval="")
@@ -158,8 +179,9 @@ def main():
         w.writerows(combined)
 
     clubs = sorted({r["club"] for r in new_rows if r["club"]})
-    print(f"Added {len(new_rows)} shots for {args.session_date} "
-          f"({', '.join(clubs) if clubs else 'no club field'})")
+    print(f"Added {len(new_rows)} shots to session {session_id}")
+    print(f"  {args.description}")
+    print(f"  clubs: {', '.join(clubs) if clubs else 'no club field'}")
     print(f"shots.csv now holds {len(combined)} rows. Backup at shots.csv.bak")
     print("Next: add a row to data/sessions.csv, then run scripts/build.py")
 
