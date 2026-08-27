@@ -36,6 +36,20 @@ gapping table it would quietly drag the 8-iron average down and widen the band.
 They're still logged, and still summarised under their own `context_drill` scope,
 so drill progress can be tracked without contaminating anything else.
 
+**Every shot is struck off the same mat**, including SGT and casual rounds — the
+lie is simulated in software, not physical. So delivery data (club speed, face
+angle, path, smash, impact position) is directly comparable across `practice`,
+`sgt` and `play`, and pooling them is legitimate. Note also that `shots.csv`
+carries ProTee Labs' measured carry, computed from the ball's launch conditions,
+*not* GSPro's in-game result after its lie modifier is applied. The two will
+disagree on a shot played from simulated rough; the launch monitor figure is the
+clean physical one and is what belongs in this file.
+
+What genuinely does differ on-course is **shot intent and pressure**: deliberate
+partial wedges, knockdowns and awkward yardages dilute a carry average, and
+tournament nerves are real. That's a reason to keep the `context_*` scopes, not a
+reason to split the headline number.
+
 `build/club_summary.csv` carries an `all_time` scope (everything except drills),
 the latest session, and a `context_*` scope per context, so practice and
 on-course numbers sit side by side while the headline figure stays whole.
