@@ -74,13 +74,26 @@ not persist between conversations — if it isn't in the current chat, still do 
 analysis and dashboard, and say plainly that the commit will need the token. Never
 store it in a file or embed it in the dashboard.
 
+**All data is simulator data** (ProTee VX + GSPro). There is no outdoor data. The
+distinction that matters is session type, carried in `context`:
+
+| context | what it is | in stats? |
+|---|---|---|
+| `practice` | Training and block work | yes |
+| `sgt` | Simulator Golf Tour competitive rounds | yes |
+| `play` | General casual rounds | yes |
+| `drill` | Drill reps (9-to-3, half speed, shortened) | **no** |
+
+Drills are excluded from every average because they are *deliberately* partial swings
+— a 60% rep carrying 60 m is a successful drill but would drag a gapping table down.
+They're still logged and summarised under their own `context_drill` scope, so drill
+progress is trackable without contaminating anything else. Always ask, or infer from
+the session, which context applies before logging.
+
 **`shots.csv` key columns:** `session_date`, `shot_no`, `time`, `club`, `context`,
 `hole`, then ball/club/impact fields, then `source`.
 
-- `context` is `range` or `round`. **Gapping and club averages use `range` only** —
-  on-course shots come from bad lies and adrenaline, and pooling them corrupts every
-  carry average. Round shots are summarised separately as `all_time_round`.
-- `hole` is required for `context=round` and joins to that date's round in
+- `hole` is required for `sgt` and `play`, and joins to that date's round in
   `rounds.json`. `build.py` warns if a hole doesn't exist in that round.
 - `source` records `xlsx_export`, `csv_export`, `screenshot_transcribed` or
   `scorecard_screenshot`, because transcribed rows carry more risk than direct exports.
@@ -88,10 +101,23 @@ store it in a file or embed it in the dashboard.
 
 **Adding a session:** write a dated markdown transcription into `raw/`, append rows to
 `shots.csv`, add a `sessions.csv` row, commit the screenshots alongside. Steven now
-changes clubs per shot in GSPro with ProTee Labs matched, so **rounds will carry full
+changes clubs per shot in GSPro with ProTee Labs matched, so **rounds carry full
 delivery data** — joining SGT hole cards to ProTee history is by shot sequence, which
 putts and mulligans can desynchronise. Ask for both sources and flag anything that
 doesn't reconcile rather than guessing.
+
+**Data capture.** ProTee Labs has **no export of any kind** — every number is
+transcribed from screens. Steven is moving from phone photos of the TV to native
+screencaps taken on the sim PC, which removes moiré, skew and glare. `tesseract` is
+available in this environment: on native screencaps, OCR the table and **cross-check
+it against the visual read**, flagging cells where the two disagree rather than
+silently picking one. Never OCR a phone photo of a screen — moiré destroys it.
+
+The goal state is a screencap of each shot's SUMMARY panel converted to full CSV rows
+including impact width, impact height, dynamic lie and closure rate, which the HISTORY
+table does not carry. A field-region extractor in `scripts/` keyed to the SUMMARY
+panel's fixed layout is the reliable way to do this; build it against a real native
+screencap rather than guessing the geometry.
 
 ## Progress dashboard
 
