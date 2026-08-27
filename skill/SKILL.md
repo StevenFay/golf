@@ -106,8 +106,17 @@ with the hole result, not in `shots.csv`. Also note
 what really differs on-course is shot intent (deliberate partials, knockdowns, odd
 yardages) and tournament pressure.
 
-**`shots.csv` key columns:** `session_date`, `shot_no`, `time`, `club`, `context`,
-`hole`, then ball/club/impact fields, then `source`.
+**`shots.csv` key columns:** `session_date`, `session_id`, `shot_no`, `time`, `club`,
+`context`, `hole`, then ball/club/impact fields, then `source`.
+
+- `session_id` is `{date}-{context}` plus an optional suffix (`2026-09-01-sgt-r2`).
+  **A date is not a unique key** — a warm-up block and an SGT round can share a day.
+- Every session needs a human **`description`**, stored in `sessions.csv` (or
+  `rounds.json` for rounds) and separate from `context`. Context says what kind;
+  description says which one: *"SGT Tour Championship Round 1 front nine"*,
+  *"Keperra West Course casual with Amanda"*. **If Steven doesn't give one, ask for
+  it before logging** — a session labelled only `2026-08-26-practice` is
+  unidentifiable a month later. `append.py` refuses without it and `build.py` warns.
 
 - `hole` is required for `sgt` and `play`, and joins to that date's round in
   `rounds.json`. `build.py` warns if a hole doesn't exist in that round.
@@ -134,6 +143,31 @@ including impact width, impact height, dynamic lie and closure rate, which the H
 table does not carry. A field-region extractor in `scripts/` keyed to the SUMMARY
 panel's fixed layout is the reliable way to do this; build it against a real native
 screencap rather than guessing the geometry.
+
+## Receiving screenshots
+
+**Attached directly to the message is best** for a normal batch (up to ~15 images):
+they arrive in context at full resolution and are readable immediately, with no tool
+calls. **A zip is fine and sometimes better for large batches** — one upload instead of
+fifty attachments, and filenames survive, which preserves chronological order. The cost
+is one extraction plus a `view` per image, so it is slightly slower, not harmful.
+Either way, ask for the standard preamble below rather than guessing at context.
+
+**Standard prompt text to request from Steven** (keep this stable so sessions log
+consistently):
+
+```
+Date: 2026-09-01
+Context: practice | sgt | play | drill
+Description: <e.g. SGT Tour Championship Round 2 front nine>
+Club(s): <or "as labelled in sim" / note any mislabels>
+Notes: <how it felt, what was being worked on, anything odd>
+[attach screenshots or zip]
+```
+
+If any line is missing, ask — particularly description and any club mislabels, since
+both are unrecoverable later. Club mislabels have happened before (26 Aug: the sim
+logged a whole 9-iron block as 8-iron) so always confirm rather than trusting labels.
 
 ## Progress dashboard
 
