@@ -90,10 +90,12 @@ They're still logged and summarised under their own `context_drill` scope, so dr
 progress is trackable without contaminating anything else. Always ask, or infer from
 the session, which context applies before logging.
 
-**Every shot is off the same mat, including SGT rounds** — lies are simulated in
-software, never physical. Do not reason about "bad lies", "rough" or "downhill lies"
-affecting the strike; they affect only GSPro's result, not the delivery. Delivery data
-is therefore directly comparable across `practice`, `sgt` and `play`. Also note
+**Every shot is struck off the same flat mat, including SGT rounds.** The virtual
+courses have real rough, sand and water, and finding them costs strokes — so "found
+rough" is accurate and worth recording. What it does *not* do is change the strike:
+a rough lie affects GSPro's result for that shot, never the delivery data. So never
+attribute a poor face angle or strike to a lie, and treat delivery data as directly
+comparable across `practice`, `sgt` and `play`. Also note
 `shots.csv` holds ProTee Labs' measured carry from launch conditions, **not** GSPro's
 post-lie-modifier result — the two diverge on shots from simulated rough. What really
 differs on-course is shot intent (deliberate partials, knockdowns, odd yardages) and
