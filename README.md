@@ -66,6 +66,20 @@ reason to split the headline number.
 the latest session, and a `context_*` scope per context, so practice and
 on-course numbers sit side by side while the headline figure stays whole.
 
+## Descriptions
+
+Every session carries a human `description` in `sessions.csv` (or `rounds.json`
+for rounds), separate from `context`. Context says *what kind*; description says
+*which one*:
+
+- `SGT Tour Championship Round 1 front nine`
+- `Keperra West Course casual with Amanda`
+- `7-iron block, first trial of the stronger grip`
+
+`append.py` refuses an import without `--description`, and `build.py` warns about
+any `session_id` in `shots.csv` that has no description recorded. A session
+labelled only `2026-08-26-practice` is unidentifiable a month later.
+
 ## The idea
 
 One long table beats a folder of per-session spreadsheets. Any question
@@ -81,7 +95,8 @@ Everything in `build/` is derived. If it disagrees with `shots.csv`,
 
 | column | notes |
 |---|---|
-| `session_date` | ISO `YYYY-MM-DD`. Groups shots into sessions. |
+| `session_date` | ISO `YYYY-MM-DD`. |
+| `session_id` | `{date}-{context}`, plus an optional suffix (`2026-09-01-sgt-r2`). The real session key — **a date is not unique**, since a warm-up block and an SGT round can share a day. Joins to `sessions.csv` / `rounds.json`, where the human `description` lives. |
 | `shot_no` | Shot number as shown by the launch monitor. Gaps are fine. |
 | `time` | `HH:MM:SS`, 24h. |
 | `club` | `DR 3W 4H 4I 5I 6I 7I 8I 9I PW GW SW LW` |
