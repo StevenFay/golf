@@ -29,6 +29,8 @@ BUILD = os.path.join(ROOT, "build")
 CLUB_ORDER = ["DR", "3W", "5W", "3H", "4H", "3I", "4I", "5I", "6I", "7I",
               "8I", "9I", "PW", "GW", "SW", "LW", "P"]
 
+ID_COLS = ["session_id", "description"]
+
 NUMERIC = ["carry_m", "total_m", "offline_m", "club_speed_kmh", "ball_speed_kmh",
            "smash", "spin_axis_deg", "back_spin_rpm", "side_spin_rpm",
            "launch_angle_deg", "launch_dir_deg", "face_angle_deg", "swing_path_deg",
@@ -96,6 +98,31 @@ def write_csv(path, rows):
     print(f"  wrote {os.path.relpath(path, ROOT)} ({len(rows)} rows)")
 
 
+def check_descriptions(shots):
+    """Every session_id in shots.csv should have a description in sessions.csv.
+
+    A session without a human label is unidentifiable a month later, so this
+    warns rather than letting it slip through silently.
+    """
+    path = os.path.join(DATA, "sessions.csv")
+    described = {}
+    if os.path.exists(path):
+        with open(path, newline="") as f:
+            for r in csv.DictReader(f):
+                described[r.get("session_id", "")] = (r.get("description") or "").strip()
+    rounds_path = os.path.join(DATA, "rounds.json")
+    if os.path.exists(rounds_path):
+        with open(rounds_path) as f:
+            for r in json.load(f).get("rounds", []):
+                described[r.get("session_id", "")] = (r.get("description") or "").strip()
+
+    seen = {r.get("session_id") or "" for r in shots}
+    for sid in sorted(seen):
+        if not described.get(sid):
+            print(f"  WARNING session {sid or '(blank)'} has no description "
+                  f"— add one to sessions.csv")
+
+
 def check_round_join(shots):
     """Warn if round shots don't line up with rounds.json.
 
@@ -156,6 +183,7 @@ def main():
     if drills:
         print(f"  {len(drills)} drill shots excluded from all stats")
     check_round_join(shots)
+    check_descriptions(shots)
 
     # All-time (everything but drills), plus the most recent session.
     summary = summarise(rng, "all_time")
