@@ -17,6 +17,29 @@ scripts/
 build/            derived output — disposable, regenerate anytime.
 ```
 
+## Contexts
+
+**Everything here is simulator data** — ProTee VX + GSPro. There is no outdoor
+data and no plan for any, so the distinction that matters is what kind of
+session a shot came from:
+
+| context | what it is | in stats? |
+|---|---|---|
+| `practice` | Training and block work on the range | yes |
+| `sgt` | Simulator Golf Tour competitive rounds | yes |
+| `play` | General casual rounds | yes |
+| `drill` | Drill reps — 9-to-3, half speed, shortened swings | **no** |
+
+Drills are excluded from every average because they are *deliberately* partial
+swings. A 60% 9-to-3 rep carrying 60 m is a successful drill, but pooled into a
+gapping table it would quietly drag the 8-iron average down and widen the band.
+They're still logged, and still summarised under their own `context_drill` scope,
+so drill progress can be tracked without contaminating anything else.
+
+`build/club_summary.csv` carries an `all_time` scope (everything except drills),
+the latest session, and a `context_*` scope per context, so practice and
+on-course numbers sit side by side while the headline figure stays whole.
+
 ## The idea
 
 One long table beats a folder of per-session spreadsheets. Any question
@@ -36,8 +59,8 @@ Everything in `build/` is derived. If it disagrees with `shots.csv`,
 | `shot_no` | Shot number as shown by the launch monitor. Gaps are fine. |
 | `time` | `HH:MM:SS`, 24h. |
 | `club` | `DR 3W 4H 4I 5I 6I 7I 8I 9I PW GW SW LW` |
-| `context` | `range` or `round`. Range = practice/sim. Round = played golf. **Gapping and club averages use `range` only** — on-course shots come from bad lies, awkward yardages and adrenaline, and pooling them drags every carry average down and widens every band. |
-| `hole` | Hole number, for `context=round` only. Joins to the matching date's round in `rounds.json`. Blank for range shots. |
+| `context` | One of `practice`, `sgt`, `play`, `drill`. See below. |
+| `hole` | Hole number, for `sgt` and `play` only. Joins to the matching date's round in `rounds.json`. Blank otherwise. |
 | `carry_m` `total_m` `offline_m` | Metres. Offline: **positive = right**, negative = left. |
 | `club_speed_kmh` `ball_speed_kmh` | km/h. |
 | `smash` | Ball speed ÷ club speed. |
@@ -68,16 +91,25 @@ python3 scripts/append.py 2026-09-01 /path/to/export.csv
 python3 scripts/build.py
 ```
 
-**From a played round:**
+**From a played round (SGT or casual):**
 
 ```bash
-python3 scripts/append.py 2026-09-01 round.csv --context round --hole 7
+python3 scripts/append.py 2026-09-01 round.csv --context sgt --hole 7
+python3 scripts/append.py 2026-09-01 round.csv --context play --hole 3
 # or include a 'hole' column in the CSV and omit --hole
 ```
 
-Round imports must carry a hole number — `append.py` refuses the import
-without one, and `build.py` warns if a hole doesn't exist in that date's
-round in `rounds.json`, so the join can't silently drop shots.
+On-course imports must carry a hole number — `append.py` refuses without one,
+and `build.py` warns if a hole doesn't exist in that date's round in
+`rounds.json`, so the join can't silently drop shots.
+
+**Drill reps:**
+
+```bash
+python3 scripts/append.py 2026-09-01 drills.csv --context drill
+```
+
+No hole needed. Logged, summarised separately, excluded from all averages.
 
 `append.py` maps common column-name variants onto the schema, refuses to
 write if `session_date` already exists (pass `--force` to override), and
@@ -99,11 +131,8 @@ print(sum(float(r['face_angle_deg']) for r in seven) / len(seven))
 ```
 
 Or `python3 scripts/build.py` and read `build/club_trend.csv`, which has
-per-club per-session averages ready to chart, with `context` as a column so
-charts can split range from round rather than averaging both together.
-`build/club_summary.csv` carries scopes `all_time_range`, `all_time_round`
-and the latest session, so on-course and practice numbers sit side by side
-without ever being merged.
+per-club per-session averages with `context` as a column, so charts can split
+by session type rather than averaging everything together.
 
 ## Current focus
 
