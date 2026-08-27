@@ -87,11 +87,13 @@ def main():
     ap.add_argument("session_date", help="ISO date, e.g. 2026-09-01")
     ap.add_argument("input_csv")
     ap.add_argument("--source", default="csv_export")
-    ap.add_argument("--context", default="range", choices=["range", "round"],
-                    help="range = practice/sim session, round = played golf. "
-                         "Gapping averages only use range shots.")
+    ap.add_argument("--context", default="practice",
+                    choices=["practice", "sgt", "play", "drill"],
+                    help="practice = training block; sgt = Simulator Golf Tour round; "
+                         "play = casual round; drill = drill reps (EXCLUDED from all "
+                         "stats, since partial swings would corrupt the averages).")
     ap.add_argument("--hole", default="",
-                    help="Hole number for a single-hole import (context=round). "
+                    help="Hole number for a single-hole import (sgt/play contexts). "
                          "Otherwise supply a 'hole' column in the input CSV.")
     ap.add_argument("--force", action="store_true",
                     help="replace rows if this session_date already exists")
@@ -129,10 +131,10 @@ def main():
     if not new_rows:
         sys.exit("No shot rows found in the input file.")
 
-    if args.context == "round":
+    if args.context in ("sgt", "play"):
         missing = [r for r in new_rows if not (r.get("hole") or "").strip()]
         if missing:
-            sys.exit(f"{len(missing)} round shots have no hole number. "
+            sys.exit(f"{len(missing)} on-course shots have no hole number. "
                      f"Pass --hole N, or include a 'hole' column, so the rows "
                      f"can join to rounds.json.")
     else:
