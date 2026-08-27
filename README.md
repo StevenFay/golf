@@ -38,15 +38,25 @@ so drill progress can be tracked without contaminating anything else.
 
 **Every shot is struck off the same flat mat**, including SGT and casual rounds.
 The virtual courses have genuine rough, sand and water, and finding them costs
-strokes — but the lie affects GSPro's *result*, never the strike itself. So
-delivery data (club speed, face angle, path, smash, impact position) is directly
-comparable across `practice`, `sgt` and `play`, and pooling them is legitimate.
-Note also that `shots.csv`
-carries ProTee Labs' measured carry, computed from the ball's launch conditions,
-*not* GSPro's in-game result after its lie modifier is applied. The two will
-disagree on a shot played from simulated rough; the launch monitor figure is the
-clean physical one and is what belongs in this file.
+strokes. GSPro applies **distance and spin penalties** to shots played from rough,
+deep rough and sand — it takes the measured ball data and degrades the flight it
+simulates.
 
+The line that matters for this dataset:
+
+| | affected by lie? |
+|---|---|
+| Delivery: club speed, face angle, swing path, smash, impact position, AoA | **no** — always off the mat, directly comparable across all contexts |
+| Ball at launch: ball speed, spin, launch angle (as measured by ProTee) | **no** — measured before the game touches it |
+| Carry / total **as played in GSPro** | **yes** — distance and spin penalties applied |
+
+So for a shot from rough, ProTee Labs and GSPro report different carries for the
+same swing. `shots.csv` holds the ProTee figure — the clean physical result of the
+strike. That will not match what the course showed, and that is correct. If the
+as-played distance ever matters, it belongs in `rounds.json` alongside the hole
+result, not in `shots.csv`.
+
+Note also that `shots.csv`
 What genuinely does differ on-course is **shot intent and pressure**: deliberate
 partial wedges, knockdowns and awkward yardages dilute a carry average, and
 tournament nerves are real. That's a reason to keep the `context_*` scopes, not a
