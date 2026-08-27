@@ -16,18 +16,92 @@
       "gir": "0/9",
       "strategy": "Driver benched. 3W off all tees, 4H from fairway, 3W on par 5s.",
       "holes": [
-        {"hole": 1, "par": 5, "index": 7,  "score": 6, "putts": 2, "fir": true,  "gir": false},
-        {"hole": 2, "par": 3, "index": 17, "score": 5, "putts": 3, "fir": null,  "gir": false},
-        {"hole": 3, "par": 4, "index": 1,  "score": 5, "putts": 2, "fir": false, "gir": false},
-        {"hole": 4, "par": 3, "index": 15, "score": 4, "putts": 2, "fir": null,  "gir": false},
-        {"hole": 5, "par": 4, "index": 9,  "score": 4, "putts": 1, "fir": true,  "gir": false},
-        {"hole": 6, "par": 4, "index": 5,  "score": 5, "putts": 2, "fir": false, "gir": false},
-        {"hole": 7, "par": 4, "index": 3,  "score": 4, "putts": 1, "fir": false, "gir": false},
-        {"hole": 8, "par": 5, "index": 11, "score": 7, "putts": 2, "fir": false, "gir": false},
-        {"hole": 9, "par": 3, "index": 13, "score": 4, "putts": 2, "fir": null,  "gir": false}
+        {
+          "hole": 1,
+          "par": 5,
+          "index": 7,
+          "score": 6,
+          "putts": 2,
+          "fir": true,
+          "gir": false
+        },
+        {
+          "hole": 2,
+          "par": 3,
+          "index": 17,
+          "score": 5,
+          "putts": 3,
+          "fir": null,
+          "gir": false
+        },
+        {
+          "hole": 3,
+          "par": 4,
+          "index": 1,
+          "score": 5,
+          "putts": 2,
+          "fir": false,
+          "gir": false
+        },
+        {
+          "hole": 4,
+          "par": 3,
+          "index": 15,
+          "score": 4,
+          "putts": 2,
+          "fir": null,
+          "gir": false
+        },
+        {
+          "hole": 5,
+          "par": 4,
+          "index": 9,
+          "score": 4,
+          "putts": 1,
+          "fir": true,
+          "gir": false
+        },
+        {
+          "hole": 6,
+          "par": 4,
+          "index": 5,
+          "score": 5,
+          "putts": 2,
+          "fir": false,
+          "gir": false
+        },
+        {
+          "hole": 7,
+          "par": 4,
+          "index": 3,
+          "score": 4,
+          "putts": 1,
+          "fir": false,
+          "gir": false
+        },
+        {
+          "hole": 8,
+          "par": 5,
+          "index": 11,
+          "score": 7,
+          "putts": 2,
+          "fir": false,
+          "gir": false
+        },
+        {
+          "hole": 9,
+          "par": 3,
+          "index": 13,
+          "score": 4,
+          "putts": 2,
+          "fir": null,
+          "gir": false
+        }
       ],
       "notes": "First competitive 9 on SGT. Short game carried the round: holed 18ft (h5), 13ft (h6) and two 6-footers (h7, h9), lagged 38ft and 26ft to tap-in range. Wedges into greens were sharp: 35yd to 6ft, 42yd to 9ft, 26yd to 8ft. Nearly every long shot found rough. Blow-ups on holes 1 and 8 were compounded long-club misses, matching the open-face pattern from sim data.",
-      "source": "scorecard_screenshot"
+      "source": "scorecard_screenshot",
+      "session_id": "2026-08-24-sgt",
+      "description": "SGT Tour Championship [Web] Round 1, front nine at Trosper Golf Club"
     }
   ]
 }
