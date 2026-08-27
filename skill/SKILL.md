@@ -90,6 +90,15 @@ They're still logged and summarised under their own `context_drill` scope, so dr
 progress is trackable without contaminating anything else. Always ask, or infer from
 the session, which context applies before logging.
 
+**Every shot is off the same mat, including SGT rounds** — lies are simulated in
+software, never physical. Do not reason about "bad lies", "rough" or "downhill lies"
+affecting the strike; they affect only GSPro's result, not the delivery. Delivery data
+is therefore directly comparable across `practice`, `sgt` and `play`. Also note
+`shots.csv` holds ProTee Labs' measured carry from launch conditions, **not** GSPro's
+post-lie-modifier result — the two diverge on shots from simulated rough. What really
+differs on-course is shot intent (deliberate partials, knockdowns, odd yardages) and
+tournament pressure.
+
 **`shots.csv` key columns:** `session_date`, `shot_no`, `time`, `club`, `context`,
 `hole`, then ball/club/impact fields, then `source`.
 
