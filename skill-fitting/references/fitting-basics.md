@@ -24,7 +24,7 @@ Notes:
 ## Shaft/Club Length & Lie Angle
 
 - **Lie angle** is fit primarily to your height and how your arms hang, then confirmed with impact tape or a lie board: toe-down marks = lie too upright for you (adjust flatter); heel-down marks = lie too flat (adjust more upright).
-- On the ProTee VX, **Club Lie Angle** and **horizontal/vertical impact point** data can approximate this if she's hitting the same club repeatedly and the miss pattern is consistent toe/heel.
+- On the ProTee VX, **Club Lie Angle** and **horizontal/vertical impact point** data can approximate this if he's hitting the same club repeatedly and the miss pattern is consistent toe/heel.
 - Length changes affect swing speed and control together — longer generally increases speed/distance potential but can hurt strike consistency for a beginner still building contact quality. For someone working on eliminating tops/thins, standard/stock length is usually the safer starting point rather than extending shafts.
 
 ## General Fitting Priorities for a Beginner
