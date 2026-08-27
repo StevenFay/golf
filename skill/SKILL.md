@@ -91,15 +91,20 @@ progress is trackable without contaminating anything else. Always ask, or infer 
 the session, which context applies before logging.
 
 **Every shot is struck off the same flat mat, including SGT rounds.** The virtual
-courses have real rough, sand and water, and finding them costs strokes — so "found
-rough" is accurate and worth recording. What it does *not* do is change the strike:
-a rough lie affects GSPro's result for that shot, never the delivery data. So never
-attribute a poor face angle or strike to a lie, and treat delivery data as directly
-comparable across `practice`, `sgt` and `play`. Also note
-`shots.csv` holds ProTee Labs' measured carry from launch conditions, **not** GSPro's
-post-lie-modifier result — the two diverge on shots from simulated rough. What really
-differs on-course is shot intent (deliberate partials, knockdowns, odd yardages) and
-tournament pressure.
+courses have real rough, sand and water; finding them costs strokes, and GSPro applies
+**distance and spin penalties** to shots from rough, deep rough and sand. So "found
+rough" is accurate and worth recording.
+
+What the lie does *not* touch is the swing itself. Delivery (club speed, face angle,
+path, smash, impact position, AoA) and the measured launch conditions are identical in
+kind across every context — never attribute a poor face angle or a thin strike to a
+lie. What the lie changes is the flight GSPro simulates from that data, so for a
+penalised shot **ProTee Labs and GSPro report different carries for the same swing**.
+`shots.csv` holds the ProTee figure (the clean physical result); it will not match what
+the course showed, and that is correct. As-played distance belongs in `rounds.json`
+with the hole result, not in `shots.csv`. Also note
+what really differs on-course is shot intent (deliberate partials, knockdowns, odd
+yardages) and tournament pressure.
 
 **`shots.csv` key columns:** `session_date`, `shot_no`, `time`, `club`, `context`,
 `hole`, then ball/club/impact fields, then `source`.
