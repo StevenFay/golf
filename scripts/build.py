@@ -99,7 +99,7 @@ def write_csv(path, rows):
 def check_round_join(shots):
     """Warn if round shots don't line up with rounds.json.
 
-    `hole` is only meaningful for context=round, and it must match a hole
+    `hole` is only meaningful for on-course contexts (sgt, play), and must match a hole
     that actually exists in that date's round — otherwise the join silently
     drops shots and nobody notices.
     """
@@ -110,13 +110,14 @@ def check_round_join(shots):
         rounds = json.load(f).get("rounds", [])
     by_date = {r["date"]: {h["hole"] for h in r.get("holes", [])} for r in rounds}
 
+    ROUND_CTX = ("sgt", "play")
     problems = []
     for r in shots:
-        ctx, hole = (r.get("context") or "range"), (r.get("hole") or "").strip()
-        if ctx == "round":
+        ctx, hole = (r.get("context") or "practice"), (r.get("hole") or "").strip()
+        if ctx in ROUND_CTX:
             if not hole:
                 problems.append(f"{r['session_date']} shot {r['shot_no']}: "
-                                f"context=round but no hole")
+                                f"context={ctx} but no hole")
             elif r["session_date"] not in by_date:
                 problems.append(f"{r['session_date']}: round shots but no "
                                 f"matching round in rounds.json")
@@ -136,35 +137,43 @@ def check_round_join(shots):
 def main():
     shots = load_shots()
     dates = sorted({r["session_date"] for r in shots})
-    contexts = sorted({r.get("context") or "range" for r in shots})
+    contexts = sorted({r.get("context") or "practice" for r in shots})
     print(f"Loaded {len(shots)} shots across {len(dates)} sessions "
           f"({dates[0]} to {dates[-1]}); contexts: {', '.join(contexts)}")
 
-    # Gapping and club stats come from RANGE shots only. On-course shots come
-    # from bad lies, awkward yardages and adrenaline — pooling them would drag
-    # every carry average down and widen every band.
-    rng = [r for r in shots if (r.get("context") or "range") == "range"]
-    rnd = [r for r in shots if r.get("context") == "round"]
-    if rnd:
-        print(f"  {len(rng)} range shots / {len(rnd)} round shots "
-              f"— gapping uses range only")
+    # All data is simulator data. Contexts:
+    #   practice - training / block work
+    #   sgt      - Simulator Golf Tour competitive rounds
+    #   play     - general casual rounds
+    #   drill    - drill reps (half speed, shortened swings) — EXCLUDED from stats,
+    #              because deliberately partial swings would corrupt every average.
+    rng = [r for r in shots if (r.get("context") or "practice") != "drill"]
+    drills = [r for r in shots if r.get("context") == "drill"]
+    by_ctx = defaultdict(list)
+    for r in shots:
+        by_ctx[r.get("context") or "practice"].append(r)
+    print("  by context: " + ", ".join(f"{k}={len(v)}" for k, v in sorted(by_ctx.items())))
+    if drills:
+        print(f"  {len(drills)} drill shots excluded from all stats")
     check_round_join(shots)
 
-    # All-time plus the most recent session (range only).
-    summary = summarise(rng, "all_time_range")
+    # All-time (everything but drills), plus the most recent session.
+    summary = summarise(rng, "all_time")
     latest = dates[-1]
     summary += summarise([r for r in rng if r["session_date"] == latest], latest)
-    # On-course shots summarised separately so they can be compared, not merged.
-    if rnd:
-        summary += summarise(rnd, "all_time_round")
+    # Per-context scopes too, so practice vs on-course can still be compared
+    # without the headline numbers being split.
+    for ctx in ("practice", "sgt", "play", "drill"):
+        if by_ctx.get(ctx):
+            summary += summarise(by_ctx[ctx], f"context_{ctx}")
     write_csv(os.path.join(BUILD, "club_summary.csv"), summary)
 
     # Per-club per-session averages, for trend lines. Context kept as a column
     # so a chart can filter or split on it rather than silently averaging both.
     trend = []
     for d in dates:
-        for ctx, pool in (("range", rng), ("round", rnd)):
-            day = [r for r in pool if r["session_date"] == d]
+        for ctx in sorted(by_ctx):
+            day = [r for r in by_ctx[ctx] if r["session_date"] == d]
             for rec in summarise(day, d):
                 trend.append({"session_date": d, "context": ctx,
                               "club": rec["club"],
@@ -174,7 +183,7 @@ def main():
                               "face_avg": rec["face_avg"]})
     write_csv(os.path.join(BUILD, "club_trend.csv"), trend)
 
-    # Dashboard seed: BAG from the widest range session, DEEP from newest 7I block.
+    # Dashboard seed: BAG from the widest non-drill session, DEEP from newest 7I block.
     bag_date = max(
         dates,
         key=lambda d: len({r["club"] for r in rng if r["session_date"] == d})
