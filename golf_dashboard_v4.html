@@ -202,12 +202,15 @@
 
   <footer>
     <span id="privacyNote">Stored privately &mdash; only you can see this log.</span>
+    <span id="builtAt" style="font-family:'IBM Plex Mono',monospace;font-size:11px"></span>
     <span><button class="btn" id="exportBtn">Export JSON</button> <button class="btn" id="resetBtn">Clear log</button></span>
   </footer>
 </div>
 
 <script>
 (function(){
+  const BUILT_AT='29 Aug 2026 02:33 UTC';   // stamped by scripts/publish.py at publish time
+
   const S_INDEX='golf-session-index', S_PRE='golf-session:';
   const G_INDEX='sgt-round-index', G_PRE='sgt-round:';
   const $=id=>document.getElementById(id);
@@ -330,7 +333,12 @@
   // ---------- render ----------
   function head(sess,rounds){
     const l=sess[sess.length-1];
-    $('headSub').textContent=sess.length+' session'+(sess.length===1?'':'s')+' \u00B7 '+rounds.length+' SGT round'+(rounds.length===1?'':'s')+' \u00B7 last: '+fmt(l.date);
+    // Latest activity is the newest of EITHER a practice session or a round —
+    // using sessions alone made the header stale whenever the last thing
+    // logged was a round.
+    const allDates=[...sess.map(x=>x.date), ...rounds.map(x=>x.date)].sort();
+    const latest=allDates[allDates.length-1];
+    $('headSub').textContent=sess.length+' session'+(sess.length===1?'':'s')+' \u00B7 '+rounds.length+' SGT round'+(rounds.length===1?'':'s')+' \u00B7 last activity: '+fmt(latest);
     const k=l.key_stats||{};
     const st=[[k.iron_smash?k.iron_smash.toFixed(2):'\u2013','Iron smash'],
               [k.long_offline_m!=null?(k.long_offline_m>0?'+':'')+k.long_offline_m+'m':'\u2013','Avg miss'],
@@ -506,6 +514,11 @@
         try{await window.storage.delete(ik,false)}catch(e){}}
       location.reload()}catch(e){alert('Couldn\u2019t clear the log. Try again shortly.')}
   });
+
+  (function(){
+    const el=$('builtAt');
+    if(el) el.textContent = BUILT_AT.indexOf('__')===0 ? 'unpublished build' : 'Published '+BUILT_AT;
+  })();
 
   if(!HAS_STORAGE){
     const el=$('privacyNote');
