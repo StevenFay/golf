@@ -98,6 +98,32 @@ def write_csv(path, rows):
     print(f"  wrote {os.path.relpath(path, ROOT)} ({len(rows)} rows)")
 
 
+SURFACES = ("tee", "fairway", "rough", "deep_rough", "sand", "green", "recovery")
+
+
+def surface_report(shots):
+    """Break on-course shots down by the surface they were played from.
+
+    NOTE: the strike is always off the same flat mat, so *delivery* data
+    (club speed, face, path, smash, impact) is comparable regardless of
+    surface. What differs is intent — a shot from deep rough is often a
+    deliberate hack-out — and GSPro's penalised `carry_game_m`, which is
+    NOT comparable across surfaces. Compare carry_m (measured) for the
+    swing; compare carry_game_m only within the same surface.
+    """
+    on_course = [r for r in shots if (r.get("context") or "") in ("sgt", "play")]
+    if not on_course:
+        return
+    by_surface = defaultdict(list)
+    for r in on_course:
+        by_surface[(r.get("surface") or "unrecorded")].append(r)
+    print("  on-course shots by surface: " +
+          ", ".join(f"{k}={len(v)}" for k, v in sorted(by_surface.items())))
+    unknown = [k for k in by_surface if k not in SURFACES and k != "unrecorded"]
+    if unknown:
+        print(f"  WARNING unrecognised surface values: {', '.join(sorted(unknown))}")
+
+
 def check_descriptions(shots):
     """Every session_id in shots.csv should have a description in sessions.csv.
 
@@ -202,6 +228,7 @@ def main():
         print(f"  {len(drills)} drill shots excluded from all stats")
     check_round_join(shots)
     check_descriptions(shots)
+    surface_report(shots)
 
     # All-time (everything but drills), plus the most recent session.
     summary = summarise(rng, "all_time")
