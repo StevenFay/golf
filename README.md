@@ -14,6 +14,7 @@ raw/              original exports and screenshots, never edited.
 scripts/
   build.py        regenerates build/ from shots.csv.
   append.py       appends a session CSV into shots.csv with schema checking.
+  publish.py      publishes the dashboard with an automatic build stamp.
 build/            derived output — disposable, regenerate anytime.
 ```
 
@@ -105,6 +106,24 @@ The critical distinction:
 
 What genuinely differs by surface is *intent*: a swing from deep rough is often a
 deliberate hack-out, which is what `shot_type` and `exclude_from_stats` are for.
+
+## Publishing the dashboard
+
+```bash
+GITHUB_TOKEN=... python3 scripts/publish.py golf_dashboard_v4.html
+```
+
+Two dates appear on the dashboard and **neither is ever typed by hand**, because
+a hand-written date goes stale the moment someone forgets:
+
+- **"last activity"** is computed in the browser from the newest session *or*
+  round in the data. Rounds count — using sessions alone made the header read
+  26 Aug when a round had been logged on the 29th.
+- **"Published"** is stamped into the `__BUILT_AT__` placeholder at publish time.
+
+`publish.py` uploads to `index.html` (the stable URL) plus a versioned copy, then
+re-fetches the live file and confirms the stamp is present and the placeholder is
+gone, rather than trusting the API's success response.
 
 ## The idea
 
