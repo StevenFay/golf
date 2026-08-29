@@ -109,6 +109,12 @@ yardages) and tournament pressure.
 **`shots.csv` key columns:** `session_date`, `session_id`, `shot_no`, `time`, `club`,
 `context`, `hole`, then ball/club/impact fields, then `source`.
 
+- `shot_type` / `exclude_from_stats` / `exclude_reason` drop a **single** shot from all
+  averages. Use for swings that were never meant to be full: punch-outs from trees,
+  knockdowns, stymied recoveries. Steven will often mention these in passing after a
+  round — *"the 7 iron on 16 was a punch-out"* — so listen for it and flag the row
+  rather than letting one restricted swing drag a club average down. `build.py` prints
+  every exclusion on each run so it is never silent.
 - `session_id` is `{date}-{context}` plus an optional suffix (`2026-09-01-sgt-r2`).
   **A date is not a unique key** — a warm-up block and an SGT round can share a day.
 - Every session needs a human **`description`**, stored in `sessions.csv` (or
