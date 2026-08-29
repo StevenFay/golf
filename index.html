@@ -185,6 +185,16 @@
   </section>
 
   <section>
+    <h2>Where the ball was played from</h2>
+    <div class="sub">29 Aug back nine &mdash; the shot that actually explains the score.</div>
+    <div class="tcard"><div class="scroll"><table>
+      <thead><tr><th>Surface</th><th>Shots</th><th style="text-align:left">Share</th><th style="text-align:left">Note</th></tr></thead>
+      <tbody id="surfSlot"></tbody>
+    </table></div>
+    <div class="foot-note">Fairways hit off the tee on par 4s and 5s: <strong>0 of 6</strong>. Lies are simulated &mdash; the strike is always off the mat &mdash; but they drive GSPro&rsquo;s distance and spin penalties, and they dictate what shot you can play next.</div></div>
+  </section>
+
+  <section>
     <h2>SGT rounds</h2>
     <div class="sub">Simulator Golf Tour &mdash; competitive rounds.</div>
     <div id="sgtSlot"><div class="state"><div class="spinner"></div>Loading&hellip;</div></div>
@@ -245,21 +255,21 @@
   };
 
   const FOCUS={
-    tag:'Face control \u2014 breakthrough',
-    headline:'The release came back. Face average dropped from +5.8\u00B0 to +1.4\u00B0 in one session, and 16 of 45 shots came out closed. Focus now shifts from direction to strike consistency.',
+    tag:'Low point \u2014 topping long clubs',
+    headline:'Face control is largely fixed. A new fault took over on 29 Aug: attack angle went strongly POSITIVE with the 3 wood off the turf, so the low point sat behind the ball and four shots carried literally zero.',
     facts:[
-      ['What changed','26 Aug 9-iron block: face avg +1.36\u00B0 (was +5.83\u00B0). Side spin roughly halved, 1,226 \u2192 727 rpm.'],
-      ['Closed faces','16 of 45 shots, against 1 of 16 on 25 Aug. Face-to-path went negative on a real chunk \u2014 genuine draws.'],
-      ['New weak point','Strike quality, not direction. Smash ranged 1.00\u20131.35 across the block with several duffs.'],
-      ['Earned it','Step 2 unlocked: keep the 9-to-3 length, push to 80\u201390%. Full swings only once the face holds at speed.']
+      ['Evidence','3 wood attack angle +4.5\u00B0 to +10.7\u00B0 \u2014 swinging up on it from the deck. Contact 14\u201330 mm below centre; the 8 iron at \u221230.4 mm.'],
+      ['Cost','Four shots with zero carry (3W totals 79.8 m, 110.3 m, 106.7 m; 8I 131.5 m). 0 of 6 fairways hit off the tee.'],
+      ['Likely cause','A conscious wrist roll added to help the face turn over. Closure rate jumped to 2,600\u20133,900\u00B0/s (vs ~2,200 in practice) \u2014 the hands took over and flipped it.'],
+      ['Still there','Same round: 3 wood carries of 187.9 m (smash 1.46, face 0.1\u00B0), 192 m, 183.4 m. The swing works when the low point is right.']
     ],
     drills:[
-      {t:'9-to-3 at 80\u201390%',d:'Same short length, more speed. The face has to survive speed before it survives length.'},
-      {t:'Grip check every shot',d:'2\u20132.5 knuckles. It\u2019s working \u2014 don\u2019t let it drift back.'},
-      {t:'Then lengthen',d:'Full swing at moderate speed once three straight hold the band, then build speed again.'},
-      {t:'One ball per 45\u201360 s',d:'Strike scatter late in the block still looks like fatigue.'}
+      {t:'Ball position',d:'3 wood off the deck sits ~2 inches inside the lead heel. Too far forward is the commonest cause of an ascending strike.'},
+      {t:'Stop the wrist roll',d:'Let the release go passive again. The face was already fixed \u2014 it doesn\u2019t need help.'},
+      {t:'Low-point drill',d:'Tee in the mat an inch ahead of the ball. Clip it after the ball, never before.'},
+      {t:'Then rebuild speed',d:'Back to 9-to-3 at 80\u201390% once attack angle behaves.'}
     ],
-    targets:['Face 0\u20133\u00B0 open','Side spin < 500 rpm','Smash > 1.25 consistently','Then: full swing']
+    targets:['3W attack angle \u2248 0\u00B0','Irons slightly negative','Impact height within \u00B110 mm','Face 0\u20133\u00B0 open']
   };
 
   const SESSION_SEEDS=[
@@ -281,10 +291,22 @@
   ];
 
   const SGT_SEEDS=[
+    {date:'2026-08-29',event:'Tour Championship [Web] — Trosper GC',round:'Round 1 (back 9)',
+     par:35,gross:55,to_par:20,putts:19,fir:'0/6',gir:'0/9',
+     holes:[{p:4,s:5},{p:3,s:4},{p:5,s:8},{p:4,s:8},{p:3,s:4},{p:4,s:7},{p:4,s:6},{p:3,s:7},{p:5,s:6}],
+     notes:'\u201CHindenburg\u201D. Not one fairway hit off the tee on the par 4s and 5s \u2014 only 3 shots all nine were played from a fairway, against 20 from rough. Topped 3 woods off the tee (57, 59, 64 yds) guaranteed a scramble before the second shot. Hole 17: tee shot into deep rough, then 25 yds BACKWARDS to a tee box, seven on a par 3. Short game was fine: 19 putts, holed from 6 and 7 ft. Note: on-screen finish read +27 while the shot data totals +20 \u2014 gimmie handling differs, neither treated as authoritative.'},
     {date:'2026-08-24',event:'Tour Championship [Web] — Trosper GC',round:'Round 1 (front 9)',
      par:35,gross:44,to_par:9,putts:17,fir:'2/6',gir:'0/9',
      holes:[{p:5,s:6},{p:3,s:5},{p:4,s:5},{p:3,s:4},{p:4,s:4},{p:4,s:5},{p:4,s:4},{p:5,s:7},{p:3,s:4}],
      notes:'First competitive 9 on SGT. Driver benched \u2014 3W off tees, 4H from fairway, 3W on par 5s. Short game carried it: holed 18ft, 13ft and two 6-footers, lagged 38ft and 26ft to tap-in. Nearly every long shot found rough; blow-ups on 1 and 8 were compounded long-club misses.'}
+  ];
+
+  const SURFACES=[
+    {label:'Tee', n:10, note:'Every hole start'},
+    {label:'Rough', n:20, note:'Where the round was played from'},
+    {label:'Deep rough', n:2, note:'Holes 15 and 17'},
+    {label:'Fairway', n:3, note:'Three shots all nine'},
+    {label:'Green', n:19, note:'19 putts \u2014 the short game held up'}
   ];
 
   // ---------- storage ----------
@@ -398,6 +420,19 @@
     }).join('')||'<div class="state">No sessions yet.</div>';
   }
 
+  function surf(){
+    const tot=SURFACES.reduce((a,b)=>a+b.n,0);
+    $('surfSlot').innerHTML=SURFACES.map(f=>{
+      const pct=(f.n/tot*100);
+      const col=f.label.indexOf('rough')>-1||f.label.indexOf('Rough')>-1?'var(--flag)':
+                f.label==='Fairway'?'var(--turf)':'#8A6D1F';
+      return '<tr><td>'+esc(f.label)+'</td><td class="avg">'+f.n+'</td>'+
+        '<td style="text-align:left"><div class="bar"><i style="left:0;width:'+pct.toFixed(1)+'%;background:'+col+'"></i>'+
+        '<span>'+pct.toFixed(0)+'%</span></div></td>'+
+        '<td class="mm" style="text-align:left">'+esc(f.note)+'</td></tr>';
+    }).join('');
+  }
+
   function sgt(list){
     $('sgtSlot').innerHTML=list.slice().reverse().map(r=>{
       const tp=r.to_par>0?'+'+r.to_par:(r.to_par===0?'E':String(r.to_par));
@@ -451,7 +486,7 @@
     try{
       safe('head',()=>head(SESS,ROUNDS)); safe('focus',focus); safe('face',face);
       safe('deep',deep); safe('bag',bag); safe('ladder',ladder);
-      safe('sessions',()=>sessions(SESS)); safe('sgt',()=>sgt(ROUNDS)); safe('chart',()=>chart(SESS));
+      safe('sessions',()=>sessions(SESS)); safe('surf',surf); safe('sgt',()=>sgt(ROUNDS)); safe('chart',()=>chart(SESS));
       window.addEventListener('resize',()=>chart(SESS));
       if(!saved && HAS_STORAGE) $('noticeSlot').innerHTML='<div class="errbox" style="margin-top:24px">Saving to your private log didn\u2019t work just now \u2014 showing a local copy. It\u2019ll save automatically next time you open this.</div>';
     }catch(e){console.error(e);
