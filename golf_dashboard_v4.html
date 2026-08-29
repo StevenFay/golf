@@ -128,10 +128,10 @@
     <h2>Face angle &mdash; the fault we&rsquo;re fixing</h2>
     <div class="sub">Session average and share of shots inside the 0&ndash;3&deg; target band.</div>
     <div class="tcard"><div class="scroll"><table>
-      <thead><tr><th>Session</th><th>Block</th><th>Shots</th><th>Face avg</th><th>In band</th><th>Closed</th><th>Side spin</th></tr></thead>
+      <thead><tr><th>Session</th><th>Block</th><th>Shots</th><th>Face avg</th><th>Spread</th><th>In band</th><th>Closed</th><th>Side spin</th></tr></thead>
       <tbody id="faceSlot"></tbody>
     </table></div>
-    <div class="foot-note">Lower average and more closed faces = the clubface is squaring in time. This is the headline metric.</div></div>
+    <div class="foot-note">Average tells you where the face points; <strong>spread</strong> (standard deviation) tells you how repeatable it is. The average has improved every session &mdash; but on course the spread nearly doubled, so the face is now <em>centred but scattered</em>. 29 Aug is from 14 full swings read of the round&rsquo;s captures; putts excluded.</div></div>
   </section>
 
   <section>
@@ -215,7 +215,7 @@
   // who had already opened the dashboard.
   const SEED_REV = 4;
 
-  const BUILT_AT='29 Aug 2026 02:36 UTC';   // stamped by scripts/publish.py at publish time
+  const BUILT_AT='29 Aug 2026 02:37 UTC';   // stamped by scripts/publish.py at publish time
 
   const S_INDEX='golf-session-index', S_PRE='golf-session:';
   const G_INDEX='sgt-round-index', G_PRE='sgt-round:';
@@ -375,17 +375,19 @@
   }
 
   const FACE=[
-    {date:'2026-08-25', block:'7-iron', n:16, avg:'+5.83\u00B0', band:'4 / 16', closed:1,  spin:'1226 rpm', s:'bad'},
-    {date:'2026-08-26', block:'9-iron', n:45, avg:'+1.36\u00B0', band:'15 / 45', closed:16, spin:'727 rpm',  s:'good'},
-    {date:'2026-08-26', block:'8-iron', n:4,  avg:'+3.00\u00B0', band:'2 / 4',  closed:0,  spin:'554 rpm',  s:'warn'},
-    {date:'2026-08-26', block:'7-iron', n:3,  avg:'+3.00\u00B0', band:'0 / 3',  closed:1,  spin:'329 rpm',  s:'warn'}
+    {date:'2026-08-25', block:'7 iron (practice)',  n:16, avg:'+5.83\u00B0', sd:'3.35\u00B0', band:'4 / 16',  closed:1,  spin:'1226 rpm', s:'bad'},
+    {date:'2026-08-26', block:'9 iron (practice)',  n:41, avg:'+1.20\u00B0', sd:'2.88\u00B0', band:'12 / 41', closed:16, spin:'727 rpm',  s:'good'},
+    {date:'2026-08-29', block:'SGT back 9 \u2014 partial', n:14, avg:'+0.22\u00B0', sd:'5.21\u00B0', band:'7 / 14', closed:5, spin:'\u2013', s:'warn'}
   ];
 
   function face(){
     $('faceSlot').innerHTML=FACE.map(f=>{
       const col=f.s==='good'?'var(--turf)':f.s==='bad'?'var(--flag)':'#8A6D1F';
-      return '<tr><td>'+fmt(f.date)+'</td><td class="mm">'+f.block+'</td><td class="mm">'+f.n+'</td>'+
+      const sdv=parseFloat(f.sd);
+      const sdcol=sdv>4?'var(--flag)':sdv>3.2?'#8A6D1F':'var(--turf)';
+      return '<tr><td>'+fmt(f.date)+'</td><td class="mm">'+esc(f.block)+'</td><td class="mm">'+f.n+'</td>'+
         '<td class="avg" style="color:'+col+'">'+f.avg+'</td>'+
+        '<td class="avg" style="color:'+sdcol+'">'+f.sd+'</td>'+
         '<td>'+f.band+'</td><td class="mm">'+f.closed+'</td><td class="mm">'+f.spin+'</td></tr>';
     }).join('');
   }
