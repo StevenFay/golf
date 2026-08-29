@@ -148,7 +148,16 @@
         }
       ],
       "notes": "Steven's own summary: 'hindenburg'. Finished +27 having started the nine at +8. Dominated by topped long clubs, not by the face-control fault. Full shot-level rows pending a second reading pass over the 52 captures.",
-      "source": "gspro_protee_screencaps"
+      "source": "gspro_protee_screencaps",
+      "pending_exclusions": [
+        {
+          "hole": 16,
+          "club": "7I",
+          "shot_type": "punch",
+          "exclude_from_stats": true,
+          "exclude_reason": "Punch-out from behind a tree - deliberately restricted swing, not representative of the club"
+        }
+      ]
     }
   ]
 }
