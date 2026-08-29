@@ -22,8 +22,8 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SHOTS = os.path.join(ROOT, "data", "shots.csv")
 
 SCHEMA = ["session_date", "session_id", "shot_no", "time", "club", "context", "hole",
-          "shot_type", "exclude_from_stats", "exclude_reason",
-          "carry_m", "total_m",
+          "surface", "shot_type", "exclude_from_stats", "exclude_reason",
+          "carry_m", "carry_game_m", "total_m",
           "offline_m", "club_speed_kmh", "ball_speed_kmh", "smash",
           "spin_axis_deg", "back_spin_rpm", "side_spin_rpm", "launch_angle_deg",
           "launch_dir_deg", "face_angle_deg", "swing_path_deg", "face_to_path_deg",
@@ -55,6 +55,8 @@ ALIASES = {
     "impactwidth": "impact_w_mm", "impactheight": "impact_h_mm",
     "lie": "lie_deg", "closurerate": "closure_rate_dps", "closure": "closure_rate_dps",
     "hole": "hole", "holenumber": "hole", "holeno": "hole", "context": "context",
+    "surface": "surface", "lietype": "surface", "lie_type": "surface",
+    "carrygame": "carry_game_m", "carryingame": "carry_game_m",
     "shottype": "shot_type", "exclude": "exclude_from_stats",
     "excludefromstats": "exclude_from_stats", "excludereason": "exclude_reason",
 }
