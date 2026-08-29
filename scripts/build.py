@@ -19,6 +19,7 @@ import csv
 import json
 import os
 import statistics as st
+from datetime import datetime, timezone
 from collections import defaultdict
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -283,6 +284,17 @@ def main():
         f.write("const DEEP_RAW = " + json.dumps(deep, indent=2) + ";\n")
     print(f"  wrote {os.path.relpath(seed_path, ROOT)}")
 
+    payload = dashboard_payload(shots)
+    ppath = os.path.join(BUILD, "dashboard_data.json")
+    with open(ppath, "w") as f:
+        json.dump(payload, f, indent=1)
+    print(f"  wrote {os.path.relpath(ppath, ROOT)} "
+          f"({len(payload['trend'])} trend points, {len(payload['bag'])} clubs, "
+          f"{len(payload['face_rows'])} face rows)")
+    if payload["sessions_without_shot_rows"]:
+        print("  NOTE sessions with no shot-level rows yet: "
+              + ", ".join(payload["sessions_without_shot_rows"]))
+
     # Quick console read-out of the current focus metric.
     if deep_rows:
         faces = [r["face_angle_deg"] for r in deep_rows if r["face_angle_deg"] is not None]
@@ -290,6 +302,142 @@ def main():
             print(f"\n7-iron face angle ({seven_latest}): "
                   f"avg {st.mean(faces):+.1f}°, "
                   f"{sum(1 for v in faces if 0 <= v <= 3)}/{len(faces)} shots in the 0–3° target band")
+
+
+
+
+# --------------------------------------------------------------------------
+# Dashboard payload
+# --------------------------------------------------------------------------
+# Everything the dashboard renders is derived here, from shots.csv /
+# sessions.csv / rounds.json. Nothing in the dashboard is hand-typed, because
+# hand-typed constants silently go stale — that happened three times before
+# this generator existed.
+
+NON_SWING_CLUBS = {"P", "PUTTER", "PUTT"}
+
+
+def is_swing(r):
+    """Exclude putts and anything flagged out of stats."""
+    if (r.get("club") or "").upper() in NON_SWING_CLUBS:
+        return False
+    if (r.get("context") or "practice") == "drill":
+        return False
+    return str(r.get("exclude_from_stats") or "").strip().lower() not in ("1", "true", "yes", "y")
+
+
+def dashboard_payload(shots):
+    swings = [r for r in shots if is_swing(r)]
+
+    def vals(rs, col):
+        return [r[col] for r in rs if r.get(col) is not None]
+
+    def block(rs):
+        f = vals(rs, "face_angle_deg")
+        c = vals(rs, "carry_m")
+        s = vals(rs, "smash")
+        return {
+            "n": len(rs),
+            "face_avg": round(st.mean(f), 2) if f else None,
+            "face_sd": round(st.stdev(f), 2) if len(f) > 1 else None,
+            "face_band": sum(1 for v in f if 0 <= v <= 3) if f else None,
+            "face_n": len(f),
+            "face_closed": sum(1 for v in f if v < 0) if f else None,
+            "carry_avg": round(st.mean(c), 1) if c else None,
+            "smash_avg": round(st.mean(s), 2) if s else None,
+        }
+
+    # per session-and-club face blocks (the face-angle table)
+    face_rows = []
+    for sid in sorted({r.get("session_id") or r["session_date"] for r in swings}):
+        rs = [r for r in swings if (r.get("session_id") or r["session_date"]) == sid]
+        by_club = defaultdict(list)
+        for r in rs:
+            by_club[r["club"]].append(r)
+        main = max(by_club.items(), key=lambda kv: len(kv[1]))
+        b = block(main[1])
+        if b["face_avg"] is None:
+            continue
+        face_rows.append({"session_id": sid, "date": rs[0]["session_date"],
+                          "club": main[0], "context": rs[0].get("context") or "practice", **b})
+
+    # trend series, one point per session (all swing clubs pooled)
+    trend = []
+    for d in sorted({r["session_date"] for r in swings}):
+        rs = [r for r in swings if r["session_date"] == d]
+        b = block(rs)
+        trend.append({"date": d, "n": b["n"], "face_avg": b["face_avg"],
+                      "face_sd": b["face_sd"], "smash_avg": b["smash_avg"]})
+
+    # the bag: widest-coverage session
+    dates = sorted({r["session_date"] for r in swings})
+    bag_date = max(dates, key=lambda d: len({r["club"] for r in swings if r["session_date"] == d}))
+    bag = []
+    for club in sorted({r["club"] for r in swings if r["session_date"] == bag_date}, key=club_key):
+        rs = [r for r in swings if r["session_date"] == bag_date and r["club"] == club]
+        lo, avg, hi = agg(vals(rs, "carry_m"))
+        blo, bavg, bhi = agg(vals(rs, "ball_speed_kmh"))
+        slo, savg, shi = agg(vals(rs, "smash"))
+        _, cs, _ = agg(vals(rs, "club_speed_kmh"))
+        _, off, _ = agg(vals(rs, "offline_m"))
+        _, back, _ = agg(vals(rs, "back_spin_rpm"))
+        bag.append({"club": club, "n": len(rs),
+                    "carry": [lo, round(avg, 1), hi] if avg is not None else None,
+                    "ball": [blo, round(bavg, 1), bhi] if bavg is not None else None,
+                    "cs": round(cs, 1) if cs is not None else None,
+                    "smash": [slo, round(savg, 2), shi] if savg is not None else None,
+                    "off": round(off, 1) if off is not None else None,
+                    "back": round(back) if back is not None else None})
+
+    # deep dive: newest session's biggest club block
+    latest = dates[-1]
+    rs = [r for r in swings if r["session_date"] == latest]
+    by_club = defaultdict(list)
+    for r in rs:
+        by_club[r["club"]].append(r)
+    dclub, drows = max(by_club.items(), key=lambda kv: len(kv[1]))
+    METRICS = [("face_angle_deg", "Face angle", "\u00b0"), ("face_to_path_deg", "Face to path", "\u00b0"),
+               ("swing_path_deg", "Swing path", "\u00b0"), ("side_spin_rpm", "Side spin", " rpm"),
+               ("offline_m", "Off line", " m"), ("spin_axis_deg", "Spin axis", "\u00b0"),
+               ("smash", "Smash factor", ""), ("carry_m", "Carry", " m"),
+               ("ball_speed_kmh", "Ball speed", ""), ("club_speed_kmh", "Club speed", ""),
+               ("aoa_deg", "Attack angle", "\u00b0"), ("dyn_loft_deg", "Dynamic loft", "\u00b0"),
+               ("impact_h_mm", "Impact height", " mm"), ("impact_w_mm", "Impact width", " mm")]
+    deep = {"date": latest, "club": dclub, "n": len(drows), "metrics": []}
+    for col, label, unit in METRICS:
+        lo, avg, hi = agg(vals(drows, col))
+        if avg is None:
+            continue
+        deep["metrics"].append({"label": label, "avg": round(avg, 2), "min": lo, "max": hi, "unit": unit})
+
+    # surfaces, from rounds.json shot-by-shot
+    surfaces = {}
+    rpath = os.path.join(DATA, "rounds.json")
+    if os.path.exists(rpath):
+        with open(rpath) as f:
+            for rd in json.load(f).get("rounds", []):
+                counts = defaultdict(int)
+                for h in rd.get("shot_by_shot", []):
+                    for sh in h.get("shots", []):
+                        counts[sh.get("played_from", "unrecorded")] += 1
+                if counts:
+                    surfaces[rd["session_id"]] = dict(counts)
+
+    sessions, rounds = [], []
+    spath = os.path.join(DATA, "sessions.csv")
+    if os.path.exists(spath):
+        with open(spath, newline="") as f:
+            sessions = list(csv.DictReader(f))
+    if os.path.exists(rpath):
+        with open(rpath) as f:
+            rounds = json.load(f).get("rounds", [])
+
+    logged = {r["session_date"] for r in shots}
+    return {"generated": datetime.now(timezone.utc).strftime("%d %b %Y %H:%M UTC"),
+            "face_rows": face_rows, "trend": trend, "bag": bag, "bag_date": bag_date,
+            "deep": deep, "surfaces": surfaces, "sessions": sessions, "rounds": rounds,
+            "sessions_without_shot_rows": sorted(
+                {s["session_date"] for s in sessions if s["session_date"] not in logged})}
 
 
 if __name__ == "__main__":
