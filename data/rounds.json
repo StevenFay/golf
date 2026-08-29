@@ -102,6 +102,53 @@
       "source": "scorecard_screenshot",
       "session_id": "2026-08-24-sgt",
       "description": "SGT Tour Championship [Web] Round 1, front nine at Trosper Golf Club"
+    },
+    {
+      "session_id": "2026-08-29-sgt",
+      "date": "2026-08-29",
+      "tour": "SGT",
+      "event": "Tour Championship [Web]",
+      "course": "Trosper Golf Club",
+      "round": "Round 1 (back nine)",
+      "description": "SGT Tour Championship Round 1 back nine at Trosper",
+      "format": "4x9",
+      "par": 35,
+      "to_par_start": 8,
+      "to_par_finish": 27,
+      "back_nine_over_par": 19,
+      "strategy": "Driver benched - 3 wood off every tee (GSPro 'Driver' selection is a 3 wood).",
+      "hole_progress": [
+        {
+          "hole": 10,
+          "par": 4,
+          "metres": 309,
+          "to_par_after": 9,
+          "note": "Tee shot topped (carry 0, total 79.8m). Recovered with a 187.9m 3 wood, wedge to 6.6m, bogey."
+        },
+        {
+          "hole": 11,
+          "par": 3,
+          "metres": 153,
+          "to_par_after": 10,
+          "note": "6 iron tee shot thin - 85.9m carry on a 153m hole, struck 23.9mm high on the face. Bogey."
+        },
+        {
+          "hole": 12,
+          "par": 5,
+          "metres": 416,
+          "to_par_after": 13,
+          "note": "Two topped 3 woods (carry 0, totals 110.3m and 106.7m). Triple."
+        },
+        {
+          "hole": 13,
+          "par": 4,
+          "metres": 356,
+          "to_par_after": 17,
+          "note": "8 iron topped - carry 0, impact 30.4mm low on the face, face 11.8 deg open. Quadruple."
+        }
+      ],
+      "notes": "Steven's own summary: 'hindenburg'. Finished +27 having started the nine at +8. Dominated by topped long clubs, not by the face-control fault. Full shot-level rows pending a second reading pass over the 52 captures.",
+      "source": "gspro_protee_screencaps"
     }
   ]
 }
