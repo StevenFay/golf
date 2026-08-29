@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Steven's Golf Progress</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --board:#10382A; --board2:#0B2B20; --paper:#F3F5EF; --card:#FFFFFF;
+    --ink:#1C2521; --soft:#56635C; --line:#D8DED4;
+    --turf:#1F5C3D; --flag:#C2452D; --chalk:#EFE9D6; --gold:#D9A741;
+    --left:#3E6E9E; --right:#C2452D;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{background:var(--paper);color:var(--ink);font-family:'Inter',system-ui,sans-serif;font-size:15px;line-height:1.55}
+  .wrap{max-width:1000px;margin:0 auto;padding:0 20px 72px}
+  header{background:var(--board);color:var(--chalk);border-bottom:4px solid var(--gold)}
+  .head-inner{max-width:1000px;margin:0 auto;padding:32px 20px 24px}
+  .eyebrow{font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--gold);margin-bottom:8px}
+  h1{font-family:'Fraunces',serif;font-weight:700;font-size:clamp(28px,5vw,40px);line-height:1.1}
+  .head-sub{margin-top:10px;font-family:'IBM Plex Mono',monospace;font-size:12px;color:rgba(239,233,214,.75)}
+  .head-stats{display:flex;flex-wrap:wrap;gap:10px 28px;margin-top:20px;font-family:'IBM Plex Mono',monospace}
+  .hs .n{font-size:23px;font-weight:600;color:#fff}
+  .hs .l{font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:rgba(239,233,214,.65)}
+  section{margin-top:40px}
+  h2{font-family:'Fraunces',serif;font-weight:700;font-size:20px;margin-bottom:3px}
+  .sub{color:var(--soft);font-size:13px;margin-bottom:16px}
+  .k{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--turf);font-weight:600;display:block;margin-bottom:3px}
+
+  /* focus */
+  .focus-grid{display:grid;grid-template-columns:1fr;gap:14px;margin-top:28px}
+  @media(min-width:760px){.focus-grid{grid-template-columns:1.15fr 1fr}}
+  .fcard{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:16px 18px}
+  .fcard.primary{border-left:5px solid var(--flag)}
+  .tag{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.2em;text-transform:uppercase;font-weight:600;color:var(--flag)}
+  .fline{margin-top:8px;font-size:14.5px}
+  .fline b{font-weight:600}
+  .facts{list-style:none;margin-top:12px;border-top:1px solid var(--line);padding-top:10px}
+  .facts li{display:flex;gap:10px;font-size:13.5px;padding:3px 0}
+  .facts .fk{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--soft);min-width:96px;padding-top:2px}
+  .drill{display:flex;gap:11px;padding:9px 0;border-bottom:1px solid var(--line)}
+  .drill:last-child{border-bottom:none;padding-bottom:0}
+  .dnum{font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:600;color:#fff;background:var(--turf);width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex:none;margin-top:2px}
+  .dt{font-weight:600;font-size:14px}
+  .dd{font-size:13px;color:var(--soft);margin-top:1px}
+  .targets{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px}
+  .tgt{font-family:'IBM Plex Mono',monospace;font-size:11px;background:#E9F1E9;border:1px solid #C4D6C6;color:var(--turf);border-radius:4px;padding:4px 8px}
+
+  /* tables */
+  .tcard{background:var(--card);border:1px solid var(--line);border-radius:8px;overflow:hidden}
+  .scroll{overflow-x:auto}
+  table{border-collapse:collapse;width:100%;font-family:'IBM Plex Mono',monospace;font-size:12px;white-space:nowrap}
+  th{background:var(--board2);color:var(--chalk);font-weight:500;font-size:10px;letter-spacing:.1em;text-transform:uppercase;padding:9px 10px;text-align:right;position:sticky;top:0}
+  th:first-child{text-align:left}
+  td{padding:7px 10px;text-align:right;border-bottom:1px solid var(--line)}
+  td:first-child{text-align:left;font-weight:600;color:var(--ink)}
+  tr:last-child td{border-bottom:none}
+  tbody tr:hover{background:#F7F9F5}
+  .mm{color:var(--soft);font-size:11px}
+  .avg{font-weight:600}
+  .miss-r{color:var(--right)}
+  .miss-l{color:var(--left)}
+  .bar{position:relative;height:14px;background:#EDF1EA;border-radius:3px;min-width:120px}
+  .bar i{position:absolute;top:0;bottom:0;background:linear-gradient(90deg,#2E7D57,#1F5C3D);border-radius:3px}
+  .bar span{position:absolute;right:5px;top:-1px;font-size:10px;color:var(--ink);font-weight:600}
+  .foot-note{font-size:12px;color:var(--soft);padding:11px 14px;background:#FAFBF8;border-top:1px solid var(--line)}
+
+  /* 7i deep dive */
+  .metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:1px;background:var(--line)}
+  .metric{background:var(--card);padding:13px 14px}
+  .metric .ml{font-family:'IBM Plex Mono',monospace;font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--soft)}
+  .metric .mv{font-family:'IBM Plex Mono',monospace;font-size:19px;font-weight:600;margin-top:3px}
+  .metric .mr{font-size:11px;color:var(--soft);font-family:'IBM Plex Mono',monospace}
+  .metric.good .mv{color:var(--turf)} .metric.warn .mv{color:#8A6D1F} .metric.bad .mv{color:var(--flag)}
+
+  /* sessions / sgt */
+  .item{background:var(--card);border:1px solid var(--line);border-radius:8px;margin-bottom:14px;overflow:hidden}
+  .ihead{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 14px;padding:14px 18px 0}
+  .idate{font-family:'Fraunces',serif;font-weight:700;font-size:17px}
+  .itype{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--soft)}
+  .ibody{padding:10px 18px 16px;font-size:13.5px}
+  .kv{margin-top:9px}
+  .chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px}
+  .chip{font-family:'IBM Plex Mono',monospace;font-size:11px;background:var(--paper);border:1px solid var(--line);border-radius:4px;padding:4px 8px}
+  .holes{display:flex;flex-wrap:wrap;gap:4px;margin-top:12px}
+  .hole{width:34px;padding:4px 0 5px;text-align:center;border:1px solid var(--line);border-radius:4px;font-family:'IBM Plex Mono',monospace}
+  .hole .hn{font-size:9px;color:var(--soft)} .hole .hsc{font-size:14px;font-weight:600;line-height:1.2}
+  .hole.par{background:#E9F1E9;border-color:#C4D6C6}.hole.par .hsc{color:var(--turf)}
+  .hole.bogey{background:#FAF6EC;border-color:#E4D8B8}.hole.bogey .hsc{color:#8A6D1F}
+  .hole.double{background:#FBF1EF;border-color:#E4C4BC}.hole.double .hsc{color:var(--flag)}
+  .hole.birdie{background:#FFF8E4;border-color:#E4CE8C}.hole.birdie .hsc{color:#9A7514}
+
+  canvas{width:100%;display:block}
+  .legend{display:flex;flex-wrap:wrap;gap:8px 18px;font-family:'IBM Plex Mono',monospace;font-size:11px;margin-bottom:10px}
+  .legend span{display:inline-flex;align-items:center;gap:6px;color:var(--soft)}
+  .sw{width:14px;height:3px;border-radius:2px;display:inline-block}
+  .state{padding:36px 0;text-align:center;color:var(--soft);font-size:14px}
+  .spinner{width:22px;height:22px;margin:0 auto 12px;border:3px solid var(--line);border-top-color:var(--turf);border-radius:50%;animation:sp .9s linear infinite}
+  @keyframes sp{to{transform:rotate(360deg)}}
+  @media(prefers-reduced-motion:reduce){.spinner{animation:none}}
+  .errbox{background:#FBF1EF;border:1px solid #E4C4BC;border-radius:6px;padding:13px 15px;font-size:13.5px;color:#7A3226}
+  footer{margin-top:48px;padding-top:16px;border-top:1px solid var(--line);display:flex;flex-wrap:wrap;gap:10px;justify-content:space-between;align-items:center;font-size:12px;color:var(--soft)}
+  .btn{font-family:'IBM Plex Mono',monospace;font-size:11px;background:none;border:1px solid var(--line);border-radius:4px;color:var(--soft);padding:6px 10px;cursor:pointer}
+  .btn:hover{border-color:var(--flag);color:var(--flag)}
+  .btn:focus-visible{outline:2px solid var(--turf);outline-offset:2px}
+</style>
+</head>
+<body>
+<header><div class="head-inner">
+  <div class="eyebrow">Practice Log &middot; ProTee VX / GSPro &middot; SGT</div>
+  <h1>Steven&rsquo;s Golf Progress</h1>
+  <div class="head-sub" id="headSub">Loading&hellip;</div>
+  <div class="head-stats" id="headStats"></div>
+</div></header>
+
+<div class="wrap">
+  <div id="noticeSlot"></div>
+
+  <section>
+    <h2>Current focus</h2>
+    <div class="sub">One fault, the evidence behind it, and the drills that fix it.</div>
+    <div class="focus-grid" id="focusSlot"></div>
+  </section>
+
+  <section>
+    <h2>Face angle &mdash; the fault we&rsquo;re fixing</h2>
+    <div class="sub">Session average and share of shots inside the 0&ndash;3&deg; target band.</div>
+    <div class="tcard"><div class="scroll"><table>
+      <thead><tr><th>Session</th><th>Block</th><th>Shots</th><th>Face avg</th><th>Spread</th><th>In band</th><th>Closed</th><th>Side spin</th></tr></thead>
+      <tbody id="faceSlot"></tbody>
+    </table></div>
+    <div class="foot-note">Average tells you where the face points; <strong>spread</strong> (standard deviation) tells you how repeatable it is. The average has improved every session &mdash; but on course the spread nearly doubled, so the face is now <em>centred but scattered</em>. 29 Aug is from 14 full swings read of the round&rsquo;s captures; putts excluded.</div></div>
+  </section>
+
+  <section>
+    <h2>Latest block deep dive</h2>
+    <div class="sub" id="deepSub">Most recent full block &mdash; contact, face and delivery.</div>
+    <div class="tcard"><div class="metrics" id="deepSlot"></div>
+      <div class="foot-note" id="deepNote"></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>The bag</h2>
+    <div class="sub">Per club: min &middot; average &middot; max. From the 22 Aug full-bag session.</div>
+    <div class="tcard"><div class="scroll"><table>
+      <thead><tr>
+        <th>Club</th><th>Shots</th><th>Carry avg</th><th>Carry min&ndash;max</th>
+        <th>Ball spd avg</th><th>Ball min&ndash;max</th><th>Club spd</th>
+        <th>Smash</th><th>Miss avg</th><th>Back spin</th>
+      </tr></thead><tbody id="bagSlot"></tbody>
+    </table></div>
+    <div class="foot-note">Miss: positive = right, negative = left. Ball and club speed in km/h, carry in metres.</div></div>
+  </section>
+
+  <section>
+    <h2>Ball speed ladder</h2>
+    <div class="sub">Average ball speed by club &mdash; the engine behind every carry number.</div>
+    <div class="tcard"><div class="scroll"><table>
+      <thead><tr><th>Club</th><th>Avg</th><th style="text-align:left">Range (min &rarr; max)</th><th>Spread</th><th>Smash</th></tr></thead>
+      <tbody id="ladderSlot"></tbody>
+    </table></div>
+    <div class="foot-note">Bar shows each club's min&ndash;max ball speed band across the session. Wide band = inconsistent strike.</div></div>
+  </section>
+
+  <section>
+    <h2>Trends</h2>
+    <div class="sub">Session over session.</div>
+    <div class="tcard" style="padding:18px 18px 8px">
+      <div class="legend">
+        <span><i class="sw" style="background:#1F5C3D"></i>Iron contact (avg smash)</span>
+        <span><i class="sw" style="background:#C2452D"></i>Long-club miss (m, right +)</span>
+      </div>
+      <canvas id="trend" height="220"></canvas>
+      <div class="foot-note" style="margin:8px -18px -8px">Goal: green climbing toward 1.35, red settling on zero.</div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Session log</h2>
+    <div class="sub">Practice sessions, newest first.</div>
+    <div id="sessSlot"><div class="state"><div class="spinner"></div>Loading&hellip;</div></div>
+  </section>
+
+  <section>
+    <h2>Where the ball was played from</h2>
+    <div class="sub">29 Aug back nine &mdash; the shot that actually explains the score.</div>
+    <div class="tcard"><div class="scroll"><table>
+      <thead><tr><th>Surface</th><th>Shots</th><th style="text-align:left">Share</th><th style="text-align:left">Note</th></tr></thead>
+      <tbody id="surfSlot"></tbody>
+    </table></div>
+    <div class="foot-note">Fairways hit off the tee on par 4s and 5s: <strong>0 of 6</strong>. Lies are simulated &mdash; the strike is always off the mat &mdash; but they drive GSPro&rsquo;s distance and spin penalties, and they dictate what shot you can play next.</div></div>
+  </section>
+
+  <section>
+    <h2>SGT rounds</h2>
+    <div class="sub">Simulator Golf Tour &mdash; competitive rounds.</div>
+    <div id="sgtSlot"><div class="state"><div class="spinner"></div>Loading&hellip;</div></div>
+  </section>
+
+  <footer>
+    <span id="privacyNote">Stored privately &mdash; only you can see this log.</span>
+    <span id="builtAt" style="font-family:'IBM Plex Mono',monospace;font-size:11px"></span>
+    <span><button class="btn" id="exportBtn">Export JSON</button> <button class="btn" id="resetBtn">Clear log</button></span>
+  </footer>
+</div>
+
+<script>
+(function(){
+
+  const BUILT_AT='29 Aug 2026 02:42 UTC';   // stamped by scripts/publish.py
+  const DATA={"generated":"29 Aug 2026 02:40 UTC","face_rows":[{"session_id":"2026-08-25-practice","date":"2026-08-25","club":"7I","context":"practice","n":16,"face_avg":5.83,"face_sd":3.35,"face_band":4,"face_n":16,"face_closed":1,"carry_avg":115.9,"smash_avg":1.25},{"session_id":"2026-08-26-practice","date":"2026-08-26","club":"9I","context":"practice","n":45,"face_avg":1.36,"face_sd":2.88,"face_band":15,"face_n":45,"face_closed":16,"carry_avg":83.1,"smash_avg":1.21}],"trend":[{"date":"2026-08-22","n":64,"face_avg":null,"face_sd":null,"smash_avg":1.29},{"date":"2026-08-25","n":16,"face_avg":5.83,"face_sd":3.35,"smash_avg":1.25},{"date":"2026-08-26","n":52,"face_avg":1.58,"face_sd":2.98,"smash_avg":1.23}],"bag":[{"club":"DR","n":4,"carry":[128.2,162.9,193.7],"ball":[206.5,214.6,224.7],"cs":149.5,"smash":[1.39,1.44,1.49],"off":11.3,"back":2124},{"club":"3W","n":5,"carry":[132.5,173.2,196.1],"ball":[203.1,213.4,219.2],"cs":150.5,"smash":[1.38,1.42,1.46],"off":11.5,"back":3119},{"club":"4H","n":6,"carry":[165.7,173.4,183.1],"ball":[195.7,203.6,208.6],"cs":147.1,"smash":[1.35,1.39,1.43],"off":4.6,"back":4449},{"club":"4I","n":5,"carry":[156.2,170.1,180.4],"ball":[187.3,197.4,203.6],"cs":141.5,"smash":[1.34,1.39,1.43],"off":13.9,"back":3725},{"club":"5I","n":4,"carry":[147.3,153.3,159.8],"ball":[182.3,185.2,189.0],"cs":132.4,"smash":[1.37,1.4,1.41],"off":2.6,"back":4012},{"club":"6I","n":5,"carry":[141.5,149.1,155.0],"ball":[173.7,180.5,185.7],"cs":129.7,"smash":[1.33,1.39,1.44],"off":-7.5,"back":4246},{"club":"7I","n":5,"carry":[134.1,139.4,146.4],"ball":[166.6,171.7,180.4],"cs":128.9,"smash":[1.31,1.33,1.37],"off":8.4,"back":4750},{"club":"8I","n":5,"carry":[120.2,128.5,140.3],"ball":[160.0,164.2,173.3],"cs":125.9,"smash":[1.26,1.3,1.39],"off":1.0,"back":5588},{"club":"9I","n":5,"carry":[114.5,119.0,123.7],"ball":[152.3,158.5,162.4],"cs":124.0,"smash":[1.26,1.28,1.31],"off":1.3,"back":6728},{"club":"PW","n":5,"carry":[84.4,105.6,115.8],"ball":[124.6,146.4,157.4],"cs":117.6,"smash":[1.21,1.25,1.27],"off":-5.7,"back":6228},{"club":"GW","n":5,"carry":[63.0,83.0,92.8],"ball":[106.0,127.6,134.9],"cs":118.6,"smash":[0.94,1.07,1.14],"off":2.8,"back":7878},{"club":"SW","n":5,"carry":[57.0,75.6,104.3],"ball":[97.1,119.7,145.2],"cs":111.6,"smash":[0.94,1.07,1.22],"off":0.8,"back":7935},{"club":"LW","n":5,"carry":[56.3,68.4,78.8],"ball":[99.0,113.6,121.6],"cs":112.4,"smash":[0.95,1.01,1.05],"off":-3.2,"back":8881}],"bag_date":"2026-08-22","deep":{"date":"2026-08-26","club":"9I","n":45,"metrics":[{"label":"Face angle","avg":1.36,"min":-4.0,"max":6.9,"unit":"\u00b0"},{"label":"Face to path","avg":1.17,"min":-4.9,"max":8.5,"unit":"\u00b0"},{"label":"Swing path","avg":0.18,"min":-4.9,"max":4.4,"unit":"\u00b0"},{"label":"Side spin","avg":308.89,"min":-11935.0,"max":2304.0,"unit":" rpm"},{"label":"Off line","avg":3.8,"min":-8.7,"max":17.9,"unit":" m"},{"label":"Spin axis","avg":4.12,"min":-178.7,"max":168.6,"unit":"\u00b0"},{"label":"Smash factor","avg":1.21,"min":0.51,"max":1.35,"unit":""},{"label":"Carry","avg":83.1,"min":0.0,"max":126.4,"unit":" m"},{"label":"Ball speed","avg":129.0,"min":46.5,"max":164.7,"unit":""},{"label":"Club speed","avg":106.01,"min":60.0,"max":128.4,"unit":""},{"label":"Attack angle","avg":-2.71,"min":-7.4,"max":7.8,"unit":"\u00b0"},{"label":"Dynamic loft","avg":33.06,"min":23.9,"max":40.1,"unit":"\u00b0"}]},"surfaces":{"2026-08-29-sgt":{"tee":10,"rough":20,"fairway":3,"green":19,"unrecorded":1,"deep_rough":2}},"sessions":[{"session_id":"2026-08-22-practice","session_date":"2026-08-22","context":"practice","description":"Full-bag gapping session - driver through lob wedge, mapping carries","type":"Full-bag gapping","shot_count":"65","clubs":"DR;3W;4H;4I;5I;6I;7I;8I;9I;PW;GW;SW;LW","focus":"Face control at speed","diagnosis":"Near-neutral swing path but face hangs open on long clubs (driver face 9.2 deg open vs path 0.6 deg). Right miss grows from 4i up. Short clubs show mild pull/draw bias. Iron contact solid; fat/thin lapses on partial wedges.","drills":"Lead-hand grip check: 2-2.5 knuckles;9-to-3 toe-up drill with 8i then 4H at 70%","notes":"Best of bag: 7i-9i smash 1.26-1.39 with clean gapping. Driver weakest club (163m avg, 66m spread). 4I/4H/3W all cover ~170-173m; 5I and 6I only 4m apart. No impact-point or attack-angle fields in this export.","source":"xlsx_export"},{"session_id":"2026-08-25-practice","session_date":"2026-08-25","context":"practice","description":"7-iron block, first trial of the stronger 2.5-knuckle grip","type":"7-iron block (grip-change trial)","shot_count":"16","clubs":"7I","focus":"Face control at speed","diagnosis":"Grip-change transition dip, not a failed grip. After switching to 2.5 knuckles: faces 7-10 deg open, closure rate ~1850 deg/s vs 2400+ on good swings, dynamic loft up to 32-36 deg, club speed down ~5 km/h. Steering instead of releasing; speed converted to height and spin rather than distance.","drills":"Half swings at 60-70% before any full swing;Sim targets face 0-3 deg open and side spin under 500 rpm;One ball per 45-60s with fresh regrip","notes":"16 shots in ~6 minutes - rapid-fire fatigue visible late in session. Dynamic lie averaged ~7 deg toe-down, flagged for fitting review. Counter-evidence grip works: shot 2 face 0.4 closed smash 1.35 139.9m; shots 11 and 14 near-straight on new grip. Expect 2+ weeks before power returns.","source":"screenshot_transcribed"},{"session_id":"2026-08-26-practice","session_date":"2026-08-26","context":"practice","description":"Iron block - 9I, 8I and 7I, first session after the grip change bedded in","type":"Iron block practice - 9I/8I/7I, 52 shots","shot_count":"52","clubs":"9I;8I;7I","focus":"Face control at speed","diagnosis":"Major improvement. Face angle average fell from +5.83 deg (25 Aug 7I) to +1.36 deg on the 45-shot 9I block, with 16 shots actually closed - the release is returning. Absolute side spin roughly halved (1226 -> 727 rpm). Face-to-path now frequently negative. Remaining issue is consistency not direction: strike quality still scattered (smash 0.51-1.35) with several duffs and short mishits.","drills":"Continue 9-to-3 toe-up at 60-70%;Step 2 of progression: keep 9-to-3 length, raise speed to 80-90%;Only lengthen to full swing once face holds at speed","notes":"CLUB LABELS CORRECTED at Steven's instruction: shots 1-4 logged as 7I were actually 8I; shots 6-50 logged as 8I were actually 9I; shots 51-53 were genuine 7I. Shot 5 does not exist. Sensor-garbage rows to disregard: shot 20 (smash 0.63, side spin -11935), 26 (smash 0.51, backspin -5509), 23 and 45 (carry 0.0). Shots 51-53 (7I) read smash 1.40/1.45/1.36 with dynamic loft 23.8-25.4 deg, backspin 3773-3949 and launch 16-19 deg. Initially flagged as artifact - retracted. The four columns are mutually consistent: a delofted strike converts energy to ball speed rather than spin. Either the 7I is strong-lofted (28-30 deg static) or club speed reads slightly low. TO CONFIRM: check the static loft stamped on the 7-iron - it sets the correct smash benchmark for the whole set. No impact-position, lie or closure-rate data (HISTORY tab only).","source":"screenshot_transcribed"},{"session_id":"2026-08-29-sgt","session_date":"2026-08-29","context":"sgt","description":"SGT Tour Championship Round 1 back nine at Trosper","type":"SGT competitive round - back nine, 52 captures","shot_count":"52","clubs":"3W;4H;5I;6I;8I;SW;LW;Putter","focus":"Low point / attack angle","diagnosis":"NEW dominant fault: topping long clubs. Attack angle strongly POSITIVE on 3 wood (+4.5 to +10.7 deg) - hitting up on the ball from the turf - producing contact 14-30mm LOW on the face and carry of literally zero on at least four shots (3W totals 79.8, 110.3, 106.7; 8I total 131.5). Impact width also consistently heel-side (-5.9 to -27.6mm). Face control was worse than 26 Aug but is NOT the main cause of the score; one 8 iron at 11.8 deg open.","drills":"Ball position check - likely too far forward for a fairway wood off the deck;Low-point drill: strike a coin/tee just ahead of the ball;Return to 9-to-3 at 80-90% before full swings","notes":"Score +8 to +27 over the nine (+19). Good swings still present: 3W carries of 187.9m (smash 1.46, face 0.1), 192m (1.42), 183.4m (1.39), 155.8m (1.40) - so the club works when the low point is right. DATA tab averages for the round: 4H carry 57.6m / impact height -10.8mm; 8I carry 114.1m / -12.4mm; SW carry 64.6m / -7.3mm; 5I carry 85.9m / +23.9mm. Every club averaging low-face contact except the 5 iron. EXCLUSION: the 7 iron on hole 16 was a punch-out from behind a tree - flag shot_type=punch, exclude_from_stats=1 when the shot rows are logged. SGT Shot Data now logged: back nine 55 strokes (par 35, +20); hole-by-hole 5,4,8,8,4,7,6,7,6. FAIRWAYS HIT OFF THE TEE ON PAR 4s/5s: 0 of 6. Only 3 shots all nine were played from a fairway; 20 from rough and 2 from deep rough. Hole 17 shot 2 travelled 25 yds backwards to a tee box. Hole 16 shot 3 (21 yds) is the 7-iron punch-out to exclude. NOTE: on-screen finish read +27 while the shot data totals +20 for the nine - gimmie handling may differ; do not treat either as authoritative without checking. FACE ANGLE (14 full swings read, putts excluded): avg +0.22 deg, sd 5.21 deg, 7/14 in the 0-3 band, range -7.9 to +11.8. The average is the best yet (5.83 -> 1.20 -> 0.22) but the SPREAD nearly doubled vs practice (2.88 -> 5.21). Face is now centred but scattered - under tournament conditions the control loosened even though the bias is gone.","source":"screenshot_transcribed"}],"rounds":[{"date":"2026-08-24","tour":"SGT","event":"Tour Championship [Web]","course":"Trosper Golf Club","round":"Round 1 (front 9)","format":"4x9 (playing nines instead of 18s)","par":35,"gross":44,"net":44,"to_par":9,"putts":17,"fir":"2/6","gir":"0/9","strategy":"Driver benched. 3W off all tees, 4H from fairway, 3W on par 5s.","holes":[{"hole":1,"par":5,"index":7,"score":6,"putts":2,"fir":true,"gir":false},{"hole":2,"par":3,"index":17,"score":5,"putts":3,"fir":null,"gir":false},{"hole":3,"par":4,"index":1,"score":5,"putts":2,"fir":false,"gir":false},{"hole":4,"par":3,"index":15,"score":4,"putts":2,"fir":null,"gir":false},{"hole":5,"par":4,"index":9,"score":4,"putts":1,"fir":true,"gir":false},{"hole":6,"par":4,"index":5,"score":5,"putts":2,"fir":false,"gir":false},{"hole":7,"par":4,"index":3,"score":4,"putts":1,"fir":false,"gir":false},{"hole":8,"par":5,"index":11,"score":7,"putts":2,"fir":false,"gir":false},{"hole":9,"par":3,"index":13,"score":4,"putts":2,"fir":null,"gir":false}],"notes":"First competitive 9 on SGT. Short game carried the round: holed 18ft (h5), 13ft (h6) and two 6-footers (h7, h9), lagged 38ft and 26ft to tap-in range. Wedges into greens were sharp: 35yd to 6ft, 42yd to 9ft, 26yd to 8ft. Nearly every long shot found rough. Blow-ups on holes 1 and 8 were compounded long-club misses, matching the open-face pattern from sim data.","source":"scorecard_screenshot","session_id":"2026-08-24-sgt","description":"SGT Tour Championship [Web] Round 1, front nine at Trosper Golf Club"},{"session_id":"2026-08-29-sgt","date":"2026-08-29","tour":"SGT","event":"Tour Championship [Web]","course":"Trosper Golf Club","round":"Round 1 (back nine)","description":"SGT Tour Championship Round 1 back nine at Trosper","format":"4x9","par":35,"to_par_start":8,"to_par_finish":27,"back_nine_over_par":19,"strategy":"Driver benched - 3 wood off every tee (GSPro 'Driver' selection is a 3 wood).","hole_progress":[{"hole":10,"par":4,"metres":309,"to_par_after":9,"note":"Tee shot topped (carry 0, total 79.8m). Recovered with a 187.9m 3 wood, wedge to 6.6m, bogey."},{"hole":11,"par":3,"metres":153,"to_par_after":10,"note":"6 iron tee shot thin - 85.9m carry on a 153m hole, struck 23.9mm high on the face. Bogey."},{"hole":12,"par":5,"metres":416,"to_par_after":13,"note":"Two topped 3 woods (carry 0, totals 110.3m and 106.7m). Triple."},{"hole":13,"par":4,"metres":356,"to_par_after":17,"note":"8 iron topped - carry 0, impact 30.4mm low on the face, face 11.8 deg open. Quadruple."}],"notes":"Steven's own summary: 'hindenburg'. Finished +27 having started the nine at +8. Dominated by topped long clubs, not by the face-control fault. Full shot-level rows pending a second reading pass over the 52 captures.","source":"gspro_protee_screencaps","pending_exclusions":[{"hole":16,"club":"7I","shot_type":"punch","exclude_from_stats":true,"exclude_reason":"Punch-out from behind a tree - deliberately restricted swing, not representative of the club"}],"shot_by_shot":[{"hole":10,"par":4,"strokes":5,"to_par":1,"shots":[{"shot":1,"played_from":"tee","result":"57 yds","finished_on":"rough"},{"shot":2,"played_from":"rough","result":"209 yds","finished_on":"fairway"},{"shot":3,"played_from":"fairway","result":"79 yds","finished_on":"green"},{"shot":4,"played_from":"green","result":"putt 24ft","finished_on":"green"},{"shot":5,"played_from":"green","result":"gimmie","finished_on":"green"}]},{"hole":11,"par":3,"strokes":4,"to_par":1,"shots":[{"shot":1,"played_from":"tee","result":"118 yds","finished_on":"rough"},{"shot":2,"played_from":"rough","result":"74 yds","finished_on":"green"},{"shot":3,"played_from":"green","result":"putt 56ft","finished_on":"green"},{"shot":4,"played_from":"green","result":"gimmie","finished_on":"green"}]},{"hole":12,"par":5,"strokes":8,"to_par":3,"shots":[{"shot":1,"played_from":"tee","result":"(shot 1 not captured)","finished_on":"unrecorded"},{"shot":2,"played_from":"unrecorded","result":"190 yds","finished_on":"rough"},{"shot":3,"played_from":"rough","result":"49 yds","finished_on":"rough"},{"shot":4,"played_from":"rough","result":"201 yds","finished_on":"rough"},{"shot":5,"played_from":"rough","result":"216 yds","finished_on":"green"},{"shot":6,"played_from":"green","result":"putt 52ft","finished_on":"green"},{"shot":7,"played_from":"green","result":"putt 13ft","finished_on":"green"},{"shot":8,"played_from":"green","result":"gimmie","finished_on":"green"}]},{"hole":13,"par":4,"strokes":8,"to_par":4,"shots":[{"shot":1,"played_from":"tee","result":"59 yds","finished_on":"rough"},{"shot":2,"played_from":"rough","result":"136 yds","finished_on":"rough"},{"shot":3,"played_from":"rough","result":"59 yds","finished_on":"rough"},{"shot":4,"played_from":"rough","result":"147 yds","finished_on":"rough"},{"shot":5,"played_from":"rough","result":"45 yds","finished_on":"green"},{"shot":6,"played_from":"green","result":"putt 32ft","finished_on":"green"},{"shot":7,"played_from":"green","result":"putt 9ft","finished_on":"green"},{"shot":8,"played_from":"green","result":"gimmie","finished_on":"green"}]},{"hole":14,"par":3,"strokes":4,"to_par":1,"shots":[{"shot":1,"played_from":"tee","result":"133 yds","finished_on":"rough"},{"shot":2,"played_from":"rough","result":"16 yds","finished_on":"green"},{"shot":3,"played_from":"green","result":"putt 25ft","finished_on":"green"},{"shot":4,"played_from":"green","result":"gimmie","finished_on":"green"}]},{"hole":15,"par":4,"strokes":7,"to_par":3,"shots":[{"shot":1,"played_from":"tee","result":"64 yds","finished_on":"deep_rough"},{"shot":2,"played_from":"deep_rough","result":"115 yds","finished_on":"fairway"},{"shot":3,"played_from":"fairway","result":"89 yds","finished_on":"rough"},{"shot":4,"played_from":"rough","result":"138 yds","finished_on":"rough"},{"shot":5,"played_from":"rough","result":"33 yds","finished_on":"green"},{"shot":6,"played_from":"green","result":"putt 25ft","finished_on":"green"},{"shot":7,"played_from":"green","result":"gimmie","finished_on":"green"}]},{"hole":16,"par":4,"strokes":6,"to_par":2,"shots":[{"shot":1,"played_from":"tee","result":"202 yds","finished_on":"rough"},{"shot":2,"played_from":"rough","result":"127 yds","finished_on":"rough"},{"shot":3,"played_from":"rough","result":"21 yds","finished_on":"rough"},{"shot":4,"played_from":"rough","result":"52 yds","finished_on":"green"},{"shot":5,"played_from":"green","result":"putt 23ft","finished_on":"green"},{"shot":6,"played_from":"green","result":"made 7ft","finished_on":"green"}]},{"hole":17,"par":3,"strokes":7,"to_par":4,"shots":[{"shot":1,"played_from":"tee","result":"45 yds","finished_on":"deep_rough"},{"shot":2,"played_from":"deep_rough","result":"25 yds","finished_on":"tee"},{"shot":3,"played_from":"tee","result":"164 yds","finished_on":"rough"},{"shot":4,"played_from":"rough","result":"31 yds","finished_on":"rough"},{"shot":5,"played_from":"rough","result":"13 yds","finished_on":"green"},{"shot":6,"played_from":"green","result":"putt 11ft","finished_on":"green"},{"shot":7,"played_from":"green","result":"made 6ft","finished_on":"green"}]},{"hole":18,"par":5,"strokes":6,"to_par":1,"shots":[{"shot":1,"played_from":"tee","result":"178 yds","finished_on":"rough"},{"shot":2,"played_from":"rough","result":"123 yds","finished_on":"rough"},{"shot":3,"played_from":"rough","result":"103 yds","finished_on":"fairway"},{"shot":4,"played_from":"fairway","result":"99 yds","finished_on":"rough"},{"shot":5,"played_from":"rough","result":"21 yds","finished_on":"green"},{"shot":6,"played_from":"green","result":"gimmie","finished_on":"green"}]}],"source_shot_data":"SGT Shot Data tab, scorecard 70106/27782","tee_shots_par45":6,"fairways_hit":0,"strokes_back_nine":55}],"sessions_without_shot_rows":["2026-08-29"]};   // generated by scripts/build.py from shots.csv
+  const SEED_REV = 5;
+
+  const S_INDEX='golf-session-index', S_PRE='golf-session:';
+  const G_INDEX='sgt-round-index', G_PRE='sgt-round:';
+  const $=id=>document.getElementById(id);
+  function safe(name, fn){ try{ fn(); }catch(e){ console.error(name+' failed:', e); } }
+  const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+  const nn=(v,d)=>v==null?'\u2013':(typeof v==='number'?v.toFixed(d==null?1:d):v);
+
+  // ---- everything below is DERIVED, never typed ----
+  const BAG = DATA.bag.map(c=>({club:c.club,n:c.n,carry:c.carry,ball:c.ball,
+                                cs:c.cs,smash:c.smash,off:c.off,back:c.back}));
+
+  const DEEP = {
+    date: DATA.deep.date, club: DATA.deep.club, n: DATA.deep.n,
+    note: 'Generated from shots.csv for the newest session. Putts, drill reps and '
+        + 'shots flagged out of stats (punch-outs, recoveries) are excluded.',
+    metrics: DATA.deep.metrics.map(m=>{
+      const a=m.avg, lab=m.label;
+      let s='';
+      if(lab==='Face angle')      s = Math.abs(a)<=3?'good':Math.abs(a)<=5?'warn':'bad';
+      else if(lab==='Smash factor') s = a>=1.30?'good':a>=1.22?'warn':'bad';
+      else if(lab==='Attack angle') s = a<=0?'good':a<=3?'warn':'bad';
+      else if(lab==='Impact height')s = Math.abs(a)<=8?'good':Math.abs(a)<=15?'warn':'bad';
+      else if(lab==='Off line')     s = Math.abs(a)<=5?'good':Math.abs(a)<=12?'warn':'bad';
+      return {l:lab, v:(a>0&&/angle|path|axis/i.test(lab)?'+':'')+nn(a,2)+m.unit,
+              r:nn(m.min,1)+' \u2013 '+nn(m.max,1), s:s};
+    })
+  };
+
+  const FACE = DATA.face_rows.map(f=>({
+    date:f.date,
+    block:f.club+' ('+(f.context==='practice'?'practice':f.context)+')',
+    n:f.face_n,
+    avg:(f.face_avg>0?'+':'')+nn(f.face_avg,2)+'\u00B0',
+    sd:f.face_sd==null?'\u2013':nn(f.face_sd,2)+'\u00B0',
+    band:f.face_band+' / '+f.face_n,
+    closed:f.face_closed,
+    spin:'\u2013',
+    s: f.face_avg==null?'':(Math.abs(f.face_avg)<=2 && f.face_sd!=null && f.face_sd<=3.2)?'good'
+       :(Math.abs(f.face_avg)<=3?'warn':'bad')
+  }));
+
+  const SURF_LABEL={tee:'Tee',rough:'Rough',deep_rough:'Deep rough',fairway:'Fairway',
+                    green:'Green',sand:'Sand',recovery:'Recovery',unrecorded:'Unrecorded'};
+  const SURFACES = (()=>{
+    const keys=Object.keys(DATA.surfaces);
+    if(!keys.length) return [];
+    const latest=keys.sort()[keys.length-1];
+    const c=DATA.surfaces[latest];
+    return Object.keys(c).sort((x,y)=>c[y]-c[x])
+      .map(k=>({label:SURF_LABEL[k]||k, n:c[k], note:latest}));
+  })();
+
+  const SESSION_SEEDS = DATA.sessions.map(s=>({
+    date:s.session_date, type:s.description||s.type,
+    key_stats:{}, fault:s.diagnosis,
+    drills:(s.drills||'').split(';').filter(Boolean), notes:s.notes}));
+
+  const SGT_SEEDS = DATA.rounds.map(r=>({
+    date:r.date, event:r.event+' \u2014 '+(r.course||''), round:r.round,
+    par:r.par, gross:r.strokes_back_nine||r.gross, to_par:r.to_par,
+    putts:r.putts, fir:(r.fairways_hit!=null&&r.tee_shots_par45!=null)
+      ? r.fairways_hit+'/'+r.tee_shots_par45 : r.fir,
+    gir:r.gir,
+    holes:(r.shot_by_shot||r.holes||[]).map(h=>({p:h.par||h.p, s:h.strokes||h.s})),
+    notes:r.notes}));
+
+  // The ONLY hand-written content in this dashboard: the coaching narrative.
+  // Diagnosis and drills are judgement, not data, so there is nothing to derive
+  // them from. Everything else above comes from DATA.
+  const FOCUS={
+    tag:'Low point \u2014 topping long clubs',
+    headline:'Face control is largely fixed. A new fault took over on 29 Aug: attack angle went strongly POSITIVE with the 3 wood off the turf, so the low point sat behind the ball and four shots carried literally zero.',
+    facts:[
+      ['Evidence','3 wood attack angle +4.5\u00B0 to +10.7\u00B0 \u2014 swinging up on it from the deck. Contact 14\u201330 mm below centre; the 8 iron at \u221230.4 mm.'],
+      ['Cost','Four shots with zero carry. 0 of 6 fairways hit off the tee; only 3 shots all nine played from a fairway.'],
+      ['Likely cause','A conscious wrist roll added to help the face turn over. Closure rate jumped to 2,600\u20133,900\u00B0/s (vs ~2,200 in practice) \u2014 the hands took over and flipped it.'],
+      ['Watch','Face average is the best yet (+0.22\u00B0) but the spread nearly doubled on course. Centred, but scattered.']
+    ],
+    drills:[
+      {t:'Ball position',d:'3 wood off the deck sits ~2 inches inside the lead heel. Too far forward is the commonest cause of an ascending strike.'},
+      {t:'Stop the wrist roll',d:'Let the release go passive again. The face was already fixed \u2014 it doesn\u2019t need help.'},
+      {t:'Low-point drill',d:'Tee in the mat an inch ahead of the ball. Clip it after the ball, never before.'},
+      {t:'Then rebuild speed',d:'Back to 9-to-3 at 80\u201390% once attack angle behaves.'}
+    ],
+    targets:['3W attack angle \u2248 0\u00B0','Irons slightly negative','Impact height within \u00B110 mm','Face 0\u20133\u00B0 open']
+  };
+
+  // ---------- storage ----------
+  const HAS_STORAGE = (typeof window !== 'undefined' && window.storage &&
+                       typeof window.storage.get === 'function');
+
+  async function getJSON(k){
+    if(!HAS_STORAGE) return null;try{const r=await window.storage.get(k,false);return r&&r.value?JSON.parse(r.value):null}catch(e){return null}}
+  async function setRetry(k,v,tries){
+    if(!HAS_STORAGE) return false;let last=null;for(let i=0;i<(tries||3);i++){try{const r=await window.storage.set(k,v,false);if(r)return true}catch(e){last=e}await new Promise(r=>setTimeout(r,400*(i+1)))}if(last)console.warn('set failed',k,last);return false}
+  async function seedRevOk(){
+    const r=await getJSON('golf-seed-rev');
+    return (r && r.rev)===SEED_REV;
+  }
+  async function markSeedRev(){ await setRetry('golf-seed-rev',JSON.stringify({rev:SEED_REV})); }
+
+  async function seed(idxKey,pre,item,force){
+    let idx=await getJSON(idxKey); if(!Array.isArray(idx))idx=[];
+    const present=idx.includes(item.date);
+    if(present && !force) return {index:idx,saved:true};
+    if(!await setRetry(pre+item.date,JSON.stringify(item))) return {index:idx,saved:false};
+    if(present) return {index:idx,saved:true};
+    const ni=idx.concat([item.date]).sort();
+    return await setRetry(idxKey,JSON.stringify(ni))?{index:ni,saved:true}:{index:idx,saved:false};
+  }
+  async function loadAll(idx,pre){const o=[];for(const d of idx){const s=await getJSON(pre+d);if(s)o.push(s)}return o.sort((a,b)=>a.date.localeCompare(b.date))}
+  function fmt(iso){const[y,m,d]=iso.split('-').map(Number);return d+' '+['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][m-1]+' '+y}
+
+  // ---------- render ----------
+  function head(sess,rounds){
+    const l=sess[sess.length-1];
+    // Latest activity is the newest of EITHER a practice session or a round —
+    // using sessions alone made the header stale whenever the last thing
+    // logged was a round.
+    const allDates=[...sess.map(x=>x.date), ...rounds.map(x=>x.date)].sort();
+    const latest=allDates[allDates.length-1];
+    $('headSub').textContent=sess.length+' session'+(sess.length===1?'':'s')+' \u00B7 '+rounds.length+' SGT round'+(rounds.length===1?'':'s')+' \u00B7 last activity: '+fmt(latest);
+    const k=l.key_stats||{};
+    const st=[[k.iron_smash?k.iron_smash.toFixed(2):'\u2013','Iron smash'],
+              [k.long_offline_m!=null?(k.long_offline_m>0?'+':'')+k.long_offline_m+'m':'\u2013','Avg miss'],
+              [rounds.length?rounds[rounds.length-1].gross:'\u2013','Last SGT 9']];
+    $('headStats').innerHTML=st.map(([n,l])=>'<div class="hs"><div class="n">'+n+'</div><div class="l">'+l+'</div></div>').join('');
+  }
+
+  function focus(){
+    $('focusSlot').innerHTML=
+      '<div class="fcard primary"><div class="tag">'+esc(FOCUS.tag)+'</div>'+
+        '<div class="fline">'+esc(FOCUS.headline)+'</div>'+
+        '<ul class="facts">'+FOCUS.facts.map(([k,v])=>'<li><span class="fk">'+esc(k)+'</span><span>'+esc(v)+'</span></li>').join('')+'</ul>'+
+      '</div>'+
+      '<div class="fcard"><div class="tag" style="color:var(--turf)">Drill priority</div>'+
+        '<div style="margin-top:10px">'+FOCUS.drills.map((d,i)=>
+          '<div class="drill"><div class="dnum">'+(i+1)+'</div><div><div class="dt">'+esc(d.t)+'</div><div class="dd">'+esc(d.d)+'</div></div></div>').join('')+'</div>'+
+        '<span class="k" style="margin-top:14px">Sim targets</span>'+
+        '<div class="targets">'+FOCUS.targets.map(t=>'<span class="tgt">'+esc(t)+'</span>').join('')+'</div>'+
+      '</div>';
+  }
+
+
+  function face(){
+    $('faceSlot').innerHTML=FACE.map(f=>{
+      const col=f.s==='good'?'var(--turf)':f.s==='bad'?'var(--flag)':'#8A6D1F';
+      const sdv=parseFloat(f.sd);
+      const sdcol=sdv>4?'var(--flag)':sdv>3.2?'#8A6D1F':'var(--turf)';
+      return '<tr><td>'+fmt(f.date)+'</td><td class="mm">'+esc(f.block)+'</td><td class="mm">'+f.n+'</td>'+
+        '<td class="avg" style="color:'+col+'">'+f.avg+'</td>'+
+        '<td class="avg" style="color:'+sdcol+'">'+f.sd+'</td>'+
+        '<td>'+f.band+'</td><td class="mm">'+f.closed+'</td><td class="mm">'+f.spin+'</td></tr>';
+    }).join('');
+  }
+
+  function deep(){
+    $('deepSub').textContent=DEEP.club+' \u2014 '+DEEP.n+' clean shots, '+fmt(DEEP.date)+'.';
+    $('deepSlot').innerHTML=DEEP.metrics.map(m=>
+      '<div class="metric '+m.s+'"><div class="ml">'+esc(m.l)+'</div><div class="mv">'+esc(m.v)+'</div><div class="mr">'+esc(m.r)+'</div></div>').join('');
+    $('deepNote').textContent=DEEP.note;
+  }
+
+  function bag(){
+    $('bagSlot').innerHTML=BAG.map(c=>{
+      const missCls=c.off>0?'miss-r':(c.off<0?'miss-l':'');
+      const miss=(c.off>0?'+':'')+c.off.toFixed(1)+' m';
+      return '<tr><td>'+c.club+'</td><td class="mm">'+c.n+'</td>'+
+        '<td class="avg">'+c.carry[1].toFixed(1)+'</td>'+
+        '<td class="mm">'+c.carry[0].toFixed(1)+' \u2013 '+c.carry[2].toFixed(1)+'</td>'+
+        '<td class="avg">'+c.ball[1].toFixed(1)+'</td>'+
+        '<td class="mm">'+c.ball[0].toFixed(1)+' \u2013 '+c.ball[2].toFixed(1)+'</td>'+
+        '<td class="mm">'+c.cs.toFixed(1)+'</td>'+
+        '<td class="avg">'+c.smash[1].toFixed(2)+'</td>'+
+        '<td class="'+missCls+'">'+miss+'</td>'+
+        '<td class="mm">'+c.back+'</td></tr>';
+    }).join('');
+  }
+
+  function ladder(){
+    const lo=90, hi=230;
+    $('ladderSlot').innerHTML=BAG.map(c=>{
+      const left=((c.ball[0]-lo)/(hi-lo))*100, w=((c.ball[2]-c.ball[0])/(hi-lo))*100;
+      return '<tr><td>'+c.club+'</td><td class="avg">'+c.ball[1].toFixed(1)+'</td>'+
+        '<td style="text-align:left"><div class="bar"><i style="left:'+left.toFixed(1)+'%;width:'+Math.max(w,1.5).toFixed(1)+'%"></i>'+
+        '<span>'+c.ball[0].toFixed(0)+'\u2013'+c.ball[2].toFixed(0)+'</span></div></td>'+
+        '<td class="mm">'+(c.ball[2]-c.ball[0]).toFixed(1)+'</td>'+
+        '<td class="mm">'+c.smash[0].toFixed(2)+'\u2013'+c.smash[2].toFixed(2)+'</td></tr>';
+    }).join('');
+  }
+
+  function sessions(list){
+    $('sessSlot').innerHTML=list.slice().reverse().map(s=>{
+      const k=s.key_stats||{};
+      const chips=[k.iron_smash!=null?'<span class="chip">iron smash <b>'+k.iron_smash.toFixed(2)+'</b></span>':'',
+        k.long_offline_m!=null?'<span class="chip">avg miss <b>'+(k.long_offline_m>0?'+':'')+k.long_offline_m+'m</b></span>':'',
+        k.driver_avg_carry_m!=null?'<span class="chip">driver <b>'+k.driver_avg_carry_m+'m</b></span>':'',
+        k.wedge_smash!=null?'<span class="chip">wedge smash <b>'+k.wedge_smash.toFixed(2)+'</b></span>':''].join('');
+      const dr=(s.drills||s.drills_given||[]);
+      return '<div class="item"><div class="ihead"><span class="idate">'+fmt(s.date)+'</span><span class="itype">'+esc(s.type||'')+'</span></div>'+
+        '<div class="ibody">'+
+        '<div class="kv"><span class="k">Diagnosis</span>'+esc(s.fault||s.fault_diagnosed||'\u2014')+'</div>'+
+        (dr.length?'<div class="kv"><span class="k">Drills set</span>'+dr.map(esc).join(' \u00B7 ')+'</div>':'')+
+        (s.notes?'<div class="kv"><span class="k">Notes</span>'+esc(s.notes)+'</div>':'')+
+        (chips?'<div class="chips">'+chips+'</div>':'')+'</div></div>';
+    }).join('')||'<div class="state">No sessions yet.</div>';
+  }
+
+  function surf(){
+    const tot=SURFACES.reduce((a,b)=>a+b.n,0);
+    $('surfSlot').innerHTML=SURFACES.map(f=>{
+      const pct=(f.n/tot*100);
+      const col=f.label.indexOf('rough')>-1||f.label.indexOf('Rough')>-1?'var(--flag)':
+                f.label==='Fairway'?'var(--turf)':'#8A6D1F';
+      return '<tr><td>'+esc(f.label)+'</td><td class="avg">'+f.n+'</td>'+
+        '<td style="text-align:left"><div class="bar"><i style="left:0;width:'+pct.toFixed(1)+'%;background:'+col+'"></i>'+
+        '<span>'+pct.toFixed(0)+'%</span></div></td>'+
+        '<td class="mm" style="text-align:left">'+esc(f.note)+'</td></tr>';
+    }).join('');
+  }
+
+  function sgt(list){
+    $('sgtSlot').innerHTML=list.slice().reverse().map(r=>{
+      const tp=r.to_par>0?'+'+r.to_par:(r.to_par===0?'E':String(r.to_par));
+      const holes=(r.holes||[]).map((h,i)=>{const d=h.s-h.p;
+        const c=d<=-1?'birdie':d===0?'par':d===1?'bogey':'double';
+        return '<div class="hole '+c+'"><div class="hn">'+(i+1)+'</div><div class="hsc">'+h.s+'</div></div>'}).join('');
+      const chips=['<span class="chip">gross <b>'+r.gross+' ('+tp+')</b></span>',
+        r.putts!=null?'<span class="chip">putts <b>'+r.putts+'</b></span>':'',
+        r.fir?'<span class="chip">FIR <b>'+esc(r.fir)+'</b></span>':'',
+        r.gir?'<span class="chip">GIR <b>'+esc(r.gir)+'</b></span>':''].join('');
+      return '<div class="item"><div class="ihead"><span class="idate">'+fmt(r.date)+'</span><span class="itype">'+esc(r.event||'')+(r.round?' \u00B7 '+esc(r.round):'')+'</span></div>'+
+        '<div class="ibody">'+(holes?'<div class="holes">'+holes+'</div>':'')+
+        (r.notes?'<div class="kv"><span class="k">Round notes</span>'+esc(r.notes)+'</div>':'')+
+        '<div class="chips">'+chips+'</div></div></div>';
+    }).join('')||'<div class="state">No SGT rounds yet.</div>';
+  }
+
+  function chart(sess){
+    const cv=$('trend'), dpr=window.devicePixelRatio||1, W=cv.clientWidth||800, H=220;
+    cv.width=W*dpr; cv.height=H*dpr; const g=cv.getContext('2d'); g.scale(dpr,dpr); g.clearRect(0,0,W,H);
+    const pl=42,pr=44,pt=16,pb=30,pw=W-pl-pr,ph=H-pt-pb;
+    const pts=sess.map(s=>({date:s.date,sm:s.key_stats?s.key_stats.iron_smash:null,off:s.key_stats?s.key_stats.long_offline_m:null}));
+    const n=pts.length, X=i=>n===1?pl+pw/2:pl+pw*i/(n-1);
+    const Y1=v=>pt+ph*(1-(v-0.9)/0.6), Y2=v=>pt+ph*(1-(v+20)/60);
+    g.strokeStyle='#E4E8E0'; g.lineWidth=1; g.font='10px "IBM Plex Mono", monospace';
+    [1.0,1.2,1.4].forEach(v=>{const y=Y1(v);g.beginPath();g.moveTo(pl,y);g.lineTo(W-pr,y);g.stroke();
+      g.fillStyle='#1F5C3D';g.textAlign='right';g.fillText(v.toFixed(1),pl-6,y+3)});
+    [0,20].forEach(v=>{const y=Y2(v);g.fillStyle='#C2452D';g.textAlign='left';g.fillText((v>0?'+':'')+v+'m',W-pr+6,y+3)});
+    g.strokeStyle='rgba(194,69,45,.25)';g.setLineDash([4,4]);g.beginPath();g.moveTo(pl,Y2(0));g.lineTo(W-pr,Y2(0));g.stroke();g.setLineDash([]);
+    const draw=(get,Y,col)=>{const v=pts.map((p,i)=>({v:get(p),i})).filter(p=>p.v!=null);if(!v.length)return;
+      g.strokeStyle=col;g.lineWidth=2;g.beginPath();v.forEach((p,k)=>{const x=X(p.i),y=Y(p.v);k?g.lineTo(x,y):g.moveTo(x,y)});
+      if(v.length>1)g.stroke();
+      v.forEach(p=>{const x=X(p.i),y=Y(p.v);g.fillStyle=col;g.beginPath();g.arc(x,y,4,0,7);g.fill();
+        g.fillStyle='#fff';g.beginPath();g.arc(x,y,1.8,0,7);g.fill()})};
+    draw(p=>p.sm,Y1,'#1F5C3D'); draw(p=>p.off,Y2,'#C2452D');
+    g.fillStyle='#56635C';g.textAlign='center';
+    pts.forEach((p,i)=>{const[,m,d]=p.date.split('-');g.fillText(d+'/'+m,X(i),H-10)});
+  }
+
+  // ---------- boot ----------
+  let SESS=[], ROUNDS=[];
+  async function boot(){
+    let saved=true;
+    // If the stored data was written by an older seed revision, rewrite the
+    // seeded records so content edits actually reach the reader.
+    let refresh=false;
+    try{ refresh = !(await seedRevOk()); }catch(e){ refresh=true; }
+    try{let idx=[];for(const s of SESSION_SEEDS){const r=await seed(S_INDEX,S_PRE,s,refresh);saved=saved&&r.saved;idx=r.index}
+      SESS=await loadAll(idx,S_PRE)}catch(e){console.warn(e);saved=false}
+    try{let idx=[];for(const r0 of SGT_SEEDS){const r=await seed(G_INDEX,G_PRE,r0,refresh);saved=saved&&r.saved;idx=r.index}
+      ROUNDS=await loadAll(idx,G_PRE)}catch(e){console.warn(e);saved=false}
+    if(refresh && saved){ try{ await markSeedRev(); }catch(e){} }
+    for(const s of SESSION_SEEDS) if(!SESS.some(x=>x.date===s.date)) SESS.push(s);
+    for(const r of SGT_SEEDS) if(!ROUNDS.some(x=>x.date===r.date)) ROUNDS.push(r);
+    SESS.sort((a,b)=>a.date.localeCompare(b.date)); ROUNDS.sort((a,b)=>a.date.localeCompare(b.date));
+    try{
+      safe('head',()=>head(SESS,ROUNDS)); safe('focus',focus); safe('face',face);
+      safe('deep',deep); safe('bag',bag); safe('ladder',ladder);
+      safe('sessions',()=>sessions(SESS)); safe('surf',surf); safe('sgt',()=>sgt(ROUNDS)); safe('chart',()=>chart(SESS));
+      window.addEventListener('resize',()=>chart(SESS));
+      if(!saved && HAS_STORAGE) $('noticeSlot').innerHTML='<div class="errbox" style="margin-top:24px">Saving to your private log didn\u2019t work just now \u2014 showing a local copy. It\u2019ll save automatically next time you open this.</div>';
+    }catch(e){console.error(e);
+      $('sessSlot').innerHTML='<div class="errbox">Couldn\u2019t display the log. Reopen to try again \u2014 saved data is unaffected.</div>';}
+  }
+
+  $('exportBtn').addEventListener('click',()=>{
+    const blob=new Blob([JSON.stringify({exported:new Date().toISOString(),sessions:SESS,sgt_rounds:ROUNDS,bag:BAG,seven_iron:DEEP},null,2)],{type:'application/json'});
+    const a=document.createElement('a');a.href=URL.createObjectURL(blob);
+    a.download='golf-progress-'+new Date().toISOString().slice(0,10)+'.json';a.click();URL.revokeObjectURL(a.href);
+  });
+  $('resetBtn').addEventListener('click',async()=>{
+    if(!confirm('Delete every logged session and SGT round? This can\u2019t be undone.'))return;
+    try{for(const[ik,pre]of[[S_INDEX,S_PRE],[G_INDEX,G_PRE]]){
+        const idx=(await getJSON(ik))||[];
+        for(const d of idx){try{await window.storage.delete(pre+d,false)}catch(e){}}
+        try{await window.storage.delete(ik,false)}catch(e){}}
+      location.reload()}catch(e){alert('Couldn\u2019t clear the log. Try again shortly.')}
+  });
+
+  (function(){
+    const el=$('builtAt');
+    if(el) el.textContent = BUILT_AT.indexOf('__')===0 ? 'unpublished build' : 'Published '+BUILT_AT;
+  })();
+
+  if(!HAS_STORAGE){
+    const el=$('privacyNote');
+    if(el) el.textContent='Read-only view \u2014 showing the latest published snapshot.';
+    const rb=$('resetBtn'); if(rb) rb.style.display='none';
+  }
+
+  boot();
+})();
+</script>
+</body>
+</html>
