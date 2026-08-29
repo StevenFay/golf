@@ -201,6 +201,18 @@ non-shared** storage keys (`shared: false`). Structure that works:
 - **Trends**, **session log**, **SGT rounds** (colour-coded hole-by-hole scorecard).
 - **Export JSON** button, since repo backups don't cover dashboard storage.
 
+**Seeded content is versioned.** The dashboard writes its seed data into storage, and
+originally only seeded a record if that date was absent — so edits to an *existing*
+session never reached anyone who had already opened the dashboard, and they kept seeing
+stale text while the file itself was correct. There is now a `SEED_REV` constant:
+**bump it whenever seeded content changes**, and stored records get rewritten once on
+next load.
+
+**Verify by simulating, not by grepping.** Running the page's script under a DOM stub in
+node catches what string-matching misses: a missing element, a stale storage record, a
+render step that throws. Two bugs shipped in this project because a grep found the
+identifier in the JavaScript and I assumed the HTML was fine.
+
 **Dates must never be hand-written.** "Last activity" is computed in-browser from the
 newest session *or* round (rounds count — using sessions alone made the header read
 26 Aug when a round was logged on the 29th). "Published" is stamped by
