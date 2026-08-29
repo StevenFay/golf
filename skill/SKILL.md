@@ -201,6 +201,13 @@ non-shared** storage keys (`shared: false`). Structure that works:
 - **Trends**, **session log**, **SGT rounds** (colour-coded hole-by-hole scorecard).
 - **Export JSON** button, since repo backups don't cover dashboard storage.
 
+**Dates must never be hand-written.** "Last activity" is computed in-browser from the
+newest session *or* round (rounds count — using sessions alone made the header read
+26 Aug when a round was logged on the 29th). "Published" is stamped by
+`scripts/publish.py` into a `__BUILT_AT__` placeholder at publish time, which then
+re-fetches the live file to confirm the stamp landed. Publish with that script rather
+than uploading by hand.
+
 Storage must **retry on failure and fall back to rendering from in-memory seed data**
 with a soft notice — never let a storage error blank the page. Regenerate seed constants
 from `build/dashboard_seed.js` rather than hand-maintaining them.
