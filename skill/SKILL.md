@@ -109,6 +109,15 @@ yardages) and tournament pressure.
 **`shots.csv` key columns:** `session_date`, `session_id`, `shot_no`, `time`, `club`,
 `context`, `hole`, then ball/club/impact fields, then `source`.
 
+- `surface` records the lie the ball was played from (`tee`, `fairway`, `rough`,
+  `deep_rough`, `sand`, `green`, `recovery`). **Get it from the SGT shot-by-shot cards**
+  (`175 YDS TO DEEPROUGH`), which join by hole and shot number — the GSPro screen only
+  shows it as a grass texture, so never infer it from a capture.
+- `carry_m` is ProTee's measured carry (no penalty); `carry_game_m` is GSPro's played
+  carry after its distance/spin penalty. The captures show both as "CARRY (raw)" and
+  "CARRY (game)". Compare `carry_m` to judge the swing; the **gap between the two is
+  what the lie cost**, which is genuinely useful club-selection information. Never
+  compare `carry_game_m` across different surfaces.
 - `shot_type` / `exclude_from_stats` / `exclude_reason` drop a **single** shot from all
   averages. Use for swings that were never meant to be full: punch-outs from trees,
   knockdowns, stymied recoveries. Steven will often mention these in passing after a
