@@ -30,6 +30,12 @@ session a shot came from:
 | `play` | General casual rounds | yes |
 | `drill` | Drill reps — 9-to-3, half speed, shortened swings | **no** |
 
+**Individual shots can also be excluded.** Some swings were never meant to be full
+ones — a punch-out from behind a tree, a deliberate knockdown, a stymied recovery.
+They are real golf and belong in the round, but pooling them into club averages
+misrepresents what the club does. Set `exclude_from_stats=1` with a reason;
+`build.py` lists every excluded shot on each run, so it never happens silently.
+
 Drills are excluded from every average because they are *deliberately* partial
 swings. A 60% 9-to-3 rep carrying 60 m is a successful drill, but pooled into a
 gapping table it would quietly drag the 8-iron average down and widen the band.
@@ -101,6 +107,9 @@ Everything in `build/` is derived. If it disagrees with `shots.csv`,
 | `time` | `HH:MM:SS`, 24h. |
 | `club` | `DR 3W 4H 4I 5I 6I 7I 8I 9I PW GW SW LW` |
 | `context` | One of `practice`, `sgt`, `play`, `drill`. See below. |
+| `shot_type` | `full` (default), or `punch`, `knockdown`, `recovery`, `partial`. Descriptive. |
+| `exclude_from_stats` | `1` to drop this single shot from every average. |
+| `exclude_reason` | Why — required in practice, since `build.py` prints it on every run. |
 | `hole` | Hole number, for `sgt` and `play` only. Joins to the matching date's round in `rounds.json`. Blank otherwise. |
 | `carry_m` `total_m` `offline_m` | Metres. Offline: **positive = right**, negative = left. |
 | `club_speed_kmh` `ball_speed_kmh` | km/h. |
