@@ -22,6 +22,7 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SHOTS = os.path.join(ROOT, "data", "shots.csv")
 
 SCHEMA = ["session_date", "session_id", "shot_no", "time", "club", "context", "hole",
+          "shot_type", "exclude_from_stats", "exclude_reason",
           "carry_m", "total_m",
           "offline_m", "club_speed_kmh", "ball_speed_kmh", "smash",
           "spin_axis_deg", "back_spin_rpm", "side_spin_rpm", "launch_angle_deg",
@@ -54,6 +55,8 @@ ALIASES = {
     "impactwidth": "impact_w_mm", "impactheight": "impact_h_mm",
     "lie": "lie_deg", "closurerate": "closure_rate_dps", "closure": "closure_rate_dps",
     "hole": "hole", "holenumber": "hole", "holeno": "hole", "context": "context",
+    "shottype": "shot_type", "exclude": "exclude_from_stats",
+    "excludefromstats": "exclude_from_stats", "excludereason": "exclude_reason",
 }
 
 
@@ -141,6 +144,8 @@ def main():
             row["session_id"] = session_id
             row["source"] = args.source
             row["context"] = args.context
+            if not row.get("shot_type"):
+                row["shot_type"] = "full"
             if args.hole:
                 row["hole"] = args.hole
             for src_col, dest in mapping.items():
