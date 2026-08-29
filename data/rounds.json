@@ -157,7 +157,415 @@
           "exclude_from_stats": true,
           "exclude_reason": "Punch-out from behind a tree - deliberately restricted swing, not representative of the club"
         }
-      ]
+      ],
+      "shot_by_shot": [
+        {
+          "hole": 10,
+          "par": 4,
+          "strokes": 5,
+          "to_par": 1,
+          "shots": [
+            {
+              "shot": 1,
+              "played_from": "tee",
+              "result": "57 yds",
+              "finished_on": "rough"
+            },
+            {
+              "shot": 2,
+              "played_from": "rough",
+              "result": "209 yds",
+              "finished_on": "fairway"
+            },
+            {
+              "shot": 3,
+              "played_from": "fairway",
+              "result": "79 yds",
+              "finished_on": "green"
+            },
+            {
+              "shot": 4,
+              "played_from": "green",
+              "result": "putt 24ft",
+              "finished_on": "green"
+            },
+            {
+              "shot": 5,
+              "played_from": "green",
+              "result": "gimmie",
+              "finished_on": "green"
+            }
+          ]
+        },
+        {
+          "hole": 11,
+          "par": 3,
+          "strokes": 4,
+          "to_par": 1,
+          "shots": [
+            {
+              "shot": 1,
+              "played_from": "tee",
+              "result": "118 yds",
+              "finished_on": "rough"
+            },
+            {
+              "shot": 2,
+              "played_from": "rough",
+              "result": "74 yds",
+              "finished_on": "green"
+            },
+            {
+              "shot": 3,
+              "played_from": "green",
+              "result": "putt 56ft",
+              "finished_on": "green"
+            },
+            {
+              "shot": 4,
+              "played_from": "green",
+              "result": "gimmie",
+              "finished_on": "green"
+            }
+          ]
+        },
+        {
+          "hole": 12,
+          "par": 5,
+          "strokes": 8,
+          "to_par": 3,
+          "shots": [
+            {
+              "shot": 1,
+              "played_from": "tee",
+              "result": "(shot 1 not captured)",
+              "finished_on": "unrecorded"
+            },
+            {
+              "shot": 2,
+              "played_from": "unrecorded",
+              "result": "190 yds",
+              "finished_on": "rough"
+            },
+            {
+              "shot": 3,
+              "played_from": "rough",
+              "result": "49 yds",
+              "finished_on": "rough"
+            },
+            {
+              "shot": 4,
+              "played_from": "rough",
+              "result": "201 yds",
+              "finished_on": "rough"
+            },
+            {
+              "shot": 5,
+              "played_from": "rough",
+              "result": "216 yds",
+              "finished_on": "green"
+            },
+            {
+              "shot": 6,
+              "played_from": "green",
+              "result": "putt 52ft",
+              "finished_on": "green"
+            },
+            {
+              "shot": 7,
+              "played_from": "green",
+              "result": "putt 13ft",
+              "finished_on": "green"
+            },
+            {
+              "shot": 8,
+              "played_from": "green",
+              "result": "gimmie",
+              "finished_on": "green"
+            }
+          ]
+        },
+        {
+          "hole": 13,
+          "par": 4,
+          "strokes": 8,
+          "to_par": 4,
+          "shots": [
+            {
+              "shot": 1,
+              "played_from": "tee",
+              "result": "59 yds",
+              "finished_on": "rough"
+            },
+            {
+              "shot": 2,
+              "played_from": "rough",
+              "result": "136 yds",
+              "finished_on": "rough"
+            },
+            {
+              "shot": 3,
+              "played_from": "rough",
+              "result": "59 yds",
+              "finished_on": "rough"
+            },
+            {
+              "shot": 4,
+              "played_from": "rough",
+              "result": "147 yds",
+              "finished_on": "rough"
+            },
+            {
+              "shot": 5,
+              "played_from": "rough",
+              "result": "45 yds",
+              "finished_on": "green"
+            },
+            {
+              "shot": 6,
+              "played_from": "green",
+              "result": "putt 32ft",
+              "finished_on": "green"
+            },
+            {
+              "shot": 7,
+              "played_from": "green",
+              "result": "putt 9ft",
+              "finished_on": "green"
+            },
+            {
+              "shot": 8,
+              "played_from": "green",
+              "result": "gimmie",
+              "finished_on": "green"
+            }
+          ]
+        },
+        {
+          "hole": 14,
+          "par": 3,
+          "strokes": 4,
+          "to_par": 1,
+          "shots": [
+            {
+              "shot": 1,
+              "played_from": "tee",
+              "result": "133 yds",
+              "finished_on": "rough"
+            },
+            {
+              "shot": 2,
+              "played_from": "rough",
+              "result": "16 yds",
+              "finished_on": "green"
+            },
+            {
+              "shot": 3,
+              "played_from": "green",
+              "result": "putt 25ft",
+              "finished_on": "green"
+            },
+            {
+              "shot": 4,
+              "played_from": "green",
+              "result": "gimmie",
+              "finished_on": "green"
+            }
+          ]
+        },
+        {
+          "hole": 15,
+          "par": 4,
+          "strokes": 7,
+          "to_par": 3,
+          "shots": [
+            {
+              "shot": 1,
+              "played_from": "tee",
+              "result": "64 yds",
+              "finished_on": "deep_rough"
+            },
+            {
+              "shot": 2,
+              "played_from": "deep_rough",
+              "result": "115 yds",
+              "finished_on": "fairway"
+            },
+            {
+              "shot": 3,
+              "played_from": "fairway",
+              "result": "89 yds",
+              "finished_on": "rough"
+            },
+            {
+              "shot": 4,
+              "played_from": "rough",
+              "result": "138 yds",
+              "finished_on": "rough"
+            },
+            {
+              "shot": 5,
+              "played_from": "rough",
+              "result": "33 yds",
+              "finished_on": "green"
+            },
+            {
+              "shot": 6,
+              "played_from": "green",
+              "result": "putt 25ft",
+              "finished_on": "green"
+            },
+            {
+              "shot": 7,
+              "played_from": "green",
+              "result": "gimmie",
+              "finished_on": "green"
+            }
+          ]
+        },
+        {
+          "hole": 16,
+          "par": 4,
+          "strokes": 6,
+          "to_par": 2,
+          "shots": [
+            {
+              "shot": 1,
+              "played_from": "tee",
+              "result": "202 yds",
+              "finished_on": "rough"
+            },
+            {
+              "shot": 2,
+              "played_from": "rough",
+              "result": "127 yds",
+              "finished_on": "rough"
+            },
+            {
+              "shot": 3,
+              "played_from": "rough",
+              "result": "21 yds",
+              "finished_on": "rough"
+            },
+            {
+              "shot": 4,
+              "played_from": "rough",
+              "result": "52 yds",
+              "finished_on": "green"
+            },
+            {
+              "shot": 5,
+              "played_from": "green",
+              "result": "putt 23ft",
+              "finished_on": "green"
+            },
+            {
+              "shot": 6,
+              "played_from": "green",
+              "result": "made 7ft",
+              "finished_on": "green"
+            }
+          ]
+        },
+        {
+          "hole": 17,
+          "par": 3,
+          "strokes": 7,
+          "to_par": 4,
+          "shots": [
+            {
+              "shot": 1,
+              "played_from": "tee",
+              "result": "45 yds",
+              "finished_on": "deep_rough"
+            },
+            {
+              "shot": 2,
+              "played_from": "deep_rough",
+              "result": "25 yds",
+              "finished_on": "tee"
+            },
+            {
+              "shot": 3,
+              "played_from": "tee",
+              "result": "164 yds",
+              "finished_on": "rough"
+            },
+            {
+              "shot": 4,
+              "played_from": "rough",
+              "result": "31 yds",
+              "finished_on": "rough"
+            },
+            {
+              "shot": 5,
+              "played_from": "rough",
+              "result": "13 yds",
+              "finished_on": "green"
+            },
+            {
+              "shot": 6,
+              "played_from": "green",
+              "result": "putt 11ft",
+              "finished_on": "green"
+            },
+            {
+              "shot": 7,
+              "played_from": "green",
+              "result": "made 6ft",
+              "finished_on": "green"
+            }
+          ]
+        },
+        {
+          "hole": 18,
+          "par": 5,
+          "strokes": 6,
+          "to_par": 1,
+          "shots": [
+            {
+              "shot": 1,
+              "played_from": "tee",
+              "result": "178 yds",
+              "finished_on": "rough"
+            },
+            {
+              "shot": 2,
+              "played_from": "rough",
+              "result": "123 yds",
+              "finished_on": "rough"
+            },
+            {
+              "shot": 3,
+              "played_from": "rough",
+              "result": "103 yds",
+              "finished_on": "fairway"
+            },
+            {
+              "shot": 4,
+              "played_from": "fairway",
+              "result": "99 yds",
+              "finished_on": "rough"
+            },
+            {
+              "shot": 5,
+              "played_from": "rough",
+              "result": "21 yds",
+              "finished_on": "green"
+            },
+            {
+              "shot": 6,
+              "played_from": "green",
+              "result": "gimmie",
+              "finished_on": "green"
+            }
+          ]
+        }
+      ],
+      "source_shot_data": "SGT Shot Data tab, scorecard 70106/27782",
+      "tee_shots_par45": 6,
+      "fairways_hit": 0,
+      "strokes_back_nine": 55
     }
   ]
 }
