@@ -86,6 +86,26 @@ for rounds), separate from `context`. Context says *what kind*; description says
 any `session_id` in `shots.csv` that has no description recorded. A session
 labelled only `2026-08-26-practice` is unidentifiable a month later.
 
+## Surfaces
+
+`surface` records what the ball was sitting on. Source it from the **SGT shot-by-shot
+cards**, which state it outright (`231 YDS TO FAIRWAY`, `175 YDS TO DEEPROUGH`) and
+join to shots by hole and shot number. The GSPro screen shows the lie only as a grass
+texture, so don't infer it from a screenshot.
+
+The critical distinction:
+
+- **Delivery data is comparable across all surfaces.** The strike is always off the
+  same flat mat, so club speed, face angle, path, smash and impact position mean the
+  same thing whether the ball was "in" rough or on a tee.
+- **`carry_game_m` is NOT comparable across surfaces**, because that's precisely where
+  GSPro's penalty lands. Compare it only within the same surface.
+- The **gap between `carry_m` and `carry_game_m`** is the penalty itself — useful for
+  learning what a given lie actually costs, which is real club-selection information.
+
+What genuinely differs by surface is *intent*: a swing from deep rough is often a
+deliberate hack-out, which is what `shot_type` and `exclude_from_stats` are for.
+
 ## The idea
 
 One long table beats a folder of per-session spreadsheets. Any question
@@ -107,11 +127,14 @@ Everything in `build/` is derived. If it disagrees with `shots.csv`,
 | `time` | `HH:MM:SS`, 24h. |
 | `club` | `DR 3W 4H 4I 5I 6I 7I 8I 9I PW GW SW LW` |
 | `context` | One of `practice`, `sgt`, `play`, `drill`. See below. |
+| `surface` | What the ball was sitting on in GSPro: `tee`, `fairway`, `rough`, `deep_rough`, `sand`, `green`, `recovery`. On-course only. |
 | `shot_type` | `full` (default), or `punch`, `knockdown`, `recovery`, `partial`. Descriptive. |
 | `exclude_from_stats` | `1` to drop this single shot from every average. |
 | `exclude_reason` | Why — required in practice, since `build.py` prints it on every run. |
 | `hole` | Hole number, for `sgt` and `play` only. Joins to the matching date's round in `rounds.json`. Blank otherwise. |
-| `carry_m` `total_m` `offline_m` | Metres. Offline: **positive = right**, negative = left. |
+| `carry_m` | Metres, **as measured by ProTee** from the ball's launch conditions. No lie penalty. This is the swing's true output. |
+| `carry_game_m` | Metres, **as played in GSPro** — after its distance and spin penalty. Shown on the capture as "CARRY (game)" beside "CARRY (raw)". |
+| `total_m` `offline_m` | Metres. Offline: **positive = right**, negative = left. |
 | `club_speed_kmh` `ball_speed_kmh` | km/h. |
 | `smash` | Ball speed ÷ club speed. |
 | `spin_axis_deg` | Positive = tilted right (fade/slice). |
