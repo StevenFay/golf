@@ -174,8 +174,26 @@ def main():
     #   play     - general casual rounds
     #   drill    - drill reps (half speed, shortened swings) — EXCLUDED from stats,
     #              because deliberately partial swings would corrupt every average.
-    rng = [r for r in shots if (r.get("context") or "practice") != "drill"]
-    drills = [r for r in shots if r.get("context") == "drill"]
+    def excluded(r):
+        """Drill sessions, plus any individually flagged shot.
+
+        Per-shot exclusion exists for swings that were never meant to be full:
+        punch-outs from trees, deliberate knockdowns, stymied recoveries. They
+        are real golf and belong in the round, but pooling them into club
+        averages misrepresents what the club does.
+        """
+        if (r.get("context") or "practice") == "drill":
+            return True
+        return str(r.get("exclude_from_stats") or "").strip().lower() in ("1", "true", "yes", "y")
+
+    rng = [r for r in shots if not excluded(r)]
+    drills = [r for r in shots if (r.get("context") or "practice") == "drill"]
+    flagged = [r for r in shots if excluded(r) and (r.get("context") or "practice") != "drill"]
+    if flagged:
+        print(f"  {len(flagged)} shot(s) individually excluded from stats:")
+        for r in flagged[:6]:
+            print(f"    {r['session_date']} shot {r['shot_no']} {r.get('club','')}"
+                  f" — {r.get('exclude_reason') or 'no reason given'}")
     by_ctx = defaultdict(list)
     for r in shots:
         by_ctx[r.get("context") or "practice"].append(r)
