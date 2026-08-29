@@ -209,7 +209,13 @@
 
 <script>
 (function(){
-  const BUILT_AT='29 Aug 2026 02:33 UTC';   // stamped by scripts/publish.py at publish time
+  // Bump SEED_REV whenever seeded content changes. Records written by a older
+  // revision are rewritten on next load — previously a session was only seeded
+  // if its date was absent, so edits to existing sessions never reached anyone
+  // who had already opened the dashboard.
+  const SEED_REV = 4;
+
+  const BUILT_AT='29 Aug 2026 02:36 UTC';   // stamped by scripts/publish.py at publish time
 
   const S_INDEX='golf-session-index', S_PRE='golf-session:';
   const G_INDEX='sgt-round-index', G_PRE='sgt-round:';
@@ -320,10 +326,18 @@
     if(!HAS_STORAGE) return null;try{const r=await window.storage.get(k,false);return r&&r.value?JSON.parse(r.value):null}catch(e){return null}}
   async function setRetry(k,v,tries){
     if(!HAS_STORAGE) return false;let last=null;for(let i=0;i<(tries||3);i++){try{const r=await window.storage.set(k,v,false);if(r)return true}catch(e){last=e}await new Promise(r=>setTimeout(r,400*(i+1)))}if(last)console.warn('set failed',k,last);return false}
-  async function seed(idxKey,pre,item){
+  async function seedRevOk(){
+    const r=await getJSON('golf-seed-rev');
+    return (r && r.rev)===SEED_REV;
+  }
+  async function markSeedRev(){ await setRetry('golf-seed-rev',JSON.stringify({rev:SEED_REV})); }
+
+  async function seed(idxKey,pre,item,force){
     let idx=await getJSON(idxKey); if(!Array.isArray(idx))idx=[];
-    if(idx.includes(item.date))return{index:idx,saved:true};
-    if(!await setRetry(pre+item.date,JSON.stringify(item)))return{index:idx,saved:false};
+    const present=idx.includes(item.date);
+    if(present && !force) return {index:idx,saved:true};
+    if(!await setRetry(pre+item.date,JSON.stringify(item))) return {index:idx,saved:false};
+    if(present) return {index:idx,saved:true};
     const ni=idx.concat([item.date]).sort();
     return await setRetry(idxKey,JSON.stringify(ni))?{index:ni,saved:true}:{index:idx,saved:false};
   }
@@ -484,10 +498,15 @@
   let SESS=[], ROUNDS=[];
   async function boot(){
     let saved=true;
-    try{let idx=[];for(const s of SESSION_SEEDS){const r=await seed(S_INDEX,S_PRE,s);saved=saved&&r.saved;idx=r.index}
+    // If the stored data was written by an older seed revision, rewrite the
+    // seeded records so content edits actually reach the reader.
+    let refresh=false;
+    try{ refresh = !(await seedRevOk()); }catch(e){ refresh=true; }
+    try{let idx=[];for(const s of SESSION_SEEDS){const r=await seed(S_INDEX,S_PRE,s,refresh);saved=saved&&r.saved;idx=r.index}
       SESS=await loadAll(idx,S_PRE)}catch(e){console.warn(e);saved=false}
-    try{let idx=[];for(const r0 of SGT_SEEDS){const r=await seed(G_INDEX,G_PRE,r0);saved=saved&&r.saved;idx=r.index}
+    try{let idx=[];for(const r0 of SGT_SEEDS){const r=await seed(G_INDEX,G_PRE,r0,refresh);saved=saved&&r.saved;idx=r.index}
       ROUNDS=await loadAll(idx,G_PRE)}catch(e){console.warn(e);saved=false}
+    if(refresh && saved){ try{ await markSeedRev(); }catch(e){} }
     for(const s of SESSION_SEEDS) if(!SESS.some(x=>x.date===s.date)) SESS.push(s);
     for(const r of SGT_SEEDS) if(!ROUNDS.some(x=>x.date===r.date)) ROUNDS.push(r);
     SESS.sort((a,b)=>a.date.localeCompare(b.date)); ROUNDS.sort((a,b)=>a.date.localeCompare(b.date));
