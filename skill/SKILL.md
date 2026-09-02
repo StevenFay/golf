@@ -16,21 +16,26 @@ three surfaces: a **GitHub repo** (source of truth), a **progress dashboard**
 
 ## Current state (update this section as things change)
 
-- **Primary fault: face control at speed.** Swing path is near-neutral; the clubface
-  doesn't square by impact, and the right miss grows with club speed. Driver evidence:
-  path 0.6° with face 9.2° open.
-- **Grip trial in progress.** Moved to a stronger lead hand (2–2.5 knuckles) on 25 Aug.
-  Transition dip followed — faces 7–10° open, closure rate dropped to ~1,850°/s
-  (vs 2,400+ on good swings), dynamic loft up to 32–36°, club speed −5 km/h. He was
-  steering rather than releasing, not failing at the grip.
-- **Baseline metric:** 7-iron face angle, 25 Aug — avg +5.8°, **4/16 shots** inside the
-  0–3° target band. `build.py` prints this on every run. Watch it climb.
-- **Driver is benched** in competition until the 4H flies straight or with a soft draw.
-- **Strengths:** short game and putting (17 putts over his first competitive 9),
-  mid/short iron contact (7i–9i smash 1.26–1.39).
-- **Equipment flag:** dynamic lie averaging ~7° toe-down adds an independent right
-  bias. That's a fitting item — hand to the `golf-club-fitting` skill, don't solve it
-  as a swing fault.
+- **Primary fault: low point / topping long clubs.** 29 Aug SGT round: 3-wood attack
+  angle **+4.5° to +10.7°** off the turf, contact 14–30 mm below centre, four shots with
+  literally zero carry. **0 of 6 fairways** hit off the tee; only 3 shots all nine were
+  played from a fairway against 20 from rough.
+- **Likely trigger:** a conscious wrist roll added to help the face square. Closure rate
+  jumped to 2,600–3,900°/s vs ~2,200 in practice. Warn against active hand rolling;
+  the release should be passive.
+- **Face control is largely fixed — but scattered.** Average improved every session
+  (+5.83° → +1.58° → +0.56°) while **spread nearly doubled on course** (2.98° → 5.73°).
+  Report both; the average alone tells a falsely happy story.
+- **Benchmarks:** well-struck 7-iron apex **25.8 m**, descent **45°**, air time ~5.5 s,
+  roll 10–14 m. Driver club speed **149.5 km/h (93 mph)**, from only 4 shots on 22 Aug.
+  3-wood swings slightly *faster* than driver.
+- **Driver is benched** in competition until attack angle behaves.
+- **Strengths:** short game and putting (19 putts on the back nine), iron smash.
+- **Equipment flags for `golf-club-fitting`:** ~7° toe-down dynamic lie; heel-biased
+  impact width; **iron lofts unknown** and they set every smash benchmark — get the
+  stamped lofts.
+- **Data gap:** 36 of 52 captures logged for 29 Aug; club assignment inferred from the
+  one-shot-ahead club box. A ProTee HISTORY capture for that date would close both.
 
 ## Workflow
 
@@ -159,17 +164,40 @@ table does not carry. A field-region extractor in `scripts/` keyed to the SUMMAR
 panel's fixed layout is the reliable way to do this; build it against a real native
 screencap rather than guessing the geometry.
 
-## Receiving screenshots
+## Receiving screenshots — capture EVERY field shown
 
-**Attached directly to the message is best** for a normal batch (up to ~15 images):
-they arrive in context at full resolution and are readable immediately, with no tool
-calls. **A zip is fine and sometimes better for large batches** — one upload instead of
-fifty attachments, and filenames survive, which preserves chronological order. The cost
-is one extraction plus a `view` per image, so it is slightly slower, not harmful.
-Either way, ask for the standard preamble below rather than guessing at context.
+**The rule: whatever the screenshot shows, log it.** Do not transcribe a subset.
+ProTee has no export of any kind, so a field not captured from a screenshot is a
+field lost forever — there is no going back to re-read it later. Partial
+transcription has repeatedly meant returning to the same images two and three
+times, and has produced answers that were wrong because a value existed in an
+image nobody had read.
 
-**Standard prompt text to request from Steven** (keep this stable so sessions log
-consistently):
+### The full field list
+
+A ProTee **SUMMARY** panel shows all of these. Every one has a column in
+`shots.csv`; every one gets logged:
+
+| Group | Fields |
+|---|---|
+| Ball | `ball_speed_kmh`, `launch_angle_deg`, `launch_dir_deg`, `total_spin_rpm`, `back_spin_rpm`, `side_spin_rpm`, `spin_axis_deg` |
+| Club delivery | `club_speed_kmh`, `smash`, `swing_path_deg`, `face_angle_deg`, `face_to_path_deg`, `aoa_deg`, `dyn_loft_deg`, `closure_rate_dps` |
+| Impact | `impact_w_mm`, `impact_h_mm`, `lie_deg` |
+| Flight | `carry_m`, `total_m`, `offline_m`, `apex_m`, `apex_time_s`, `air_time_s`, `descent_angle_deg`, `bounce_roll_m` |
+| GSPro (round captures) | `carry_game_m` ("CARRY (game)" vs "CARRY (raw)"), hole, par, shot number, club, remaining distance |
+
+The **HISTORY** tab is a different subset: it has the ball and delivery fields for
+every shot, but **no impact position, lie, closure rate, apex, descent angle, air
+time or roll**. So HISTORY is the efficient way to get a whole session; individual
+SUMMARY captures are the only way to get impact and flight-shape data. When both
+are available, log from HISTORY and enrich the shots that have SUMMARY captures.
+
+`face_to_path_deg` is computed as face minus path when both are present rather than
+read separately.
+
+### Before transcribing
+
+Ask for the standard preamble if it is missing:
 
 ```
 Date: 2026-09-01
@@ -180,9 +208,39 @@ Notes: <how it felt, what was being worked on, anything odd>
 [attach screenshots or zip]
 ```
 
-If any line is missing, ask — particularly description and any club mislabels, since
-both are unrecoverable later. Club mislabels have happened before (26 Aug: the sim
-logged a whole 9-iron block as 8-iron) so always confirm rather than trusting labels.
+### Transcription rules
+
+1. **Order by capture time.** Zips preserve mtimes; sort by them. Random filenames
+   carry no order.
+2. **Never OCR a phone photo of a screen** — moiré destroys it. On native screencaps
+   `tesseract` is available and useful as a *cross-check*, but it misreads this
+   thin display font (2.9 read as 2.5, 28 as 29), so never trust it unattended.
+   Read the values, use OCR to catch disagreements.
+3. **Build contact sheets.** Crop header + club box + stats grid per shot, stack
+   4–6 per image with PIL, and read those. Far faster and more accurate than
+   opening 52 full screenshots.
+4. **The GSPro club box is one shot ahead.** It shows the club for the *next* shot
+   while the ProTee panel shows the shot just struck. The header likewise shows the
+   upcoming shot number and remaining distance. Verified: hole 10 header read
+   "Shot 2, 257.0 m" while SGT's card showed shot 1 finishing 281 yds from the pin.
+   **Shift club assignment by one**, and say plainly that club is inferred.
+5. **Cross-check against SGT.** The Shot Data tab gives hole, shot number, distance
+   and resulting lie for every shot. Use it for `hole` and `surface`, and to verify
+   the sequence. `surface` = where the *previous* shot finished; shot 1 is `tee`.
+6. **Log putts** as club `P`. They are excluded from swing stats automatically, but
+   they are real strokes and belong in the round.
+7. **Flag restricted swings** — punch-outs, knockdowns, recoveries — with
+   `shot_type` and `exclude_from_stats`. Listen for Steven mentioning them.
+8. **Reject internally inconsistent panels.** A mid-update capture can show one
+   shot's carry beside another's ball speed. If the fields disagree, log nothing
+   from it and say so — a wrong number is worse than a missing one.
+
+### Completeness check
+
+After logging, run `scripts/build.py`. It prints `sessions with no shot-level rows
+yet`. **That list must be empty.** If a session was only partly transcribed, say
+which shots are missing and how many — never imply a round is fully logged when it
+is not.
 
 ## Progress dashboard
 
