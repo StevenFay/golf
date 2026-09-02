@@ -170,11 +170,11 @@
     <div class="sub">Session over session.</div>
     <div class="tcard" style="padding:18px 18px 8px">
       <div class="legend">
-        <span><i class="sw" style="background:#1F5C3D"></i>Iron contact (avg smash)</span>
-        <span><i class="sw" style="background:#C2452D"></i>Long-club miss (m, right +)</span>
+        <span><i class="sw" style="background:#C2452D"></i>Face angle average (\u00B0, left axis \u2014 target 0)</span>
+        <span><i class="sw" style="background:#1F5C3D"></i>Smash factor (right axis)</span>
       </div>
       <canvas id="trend" height="220"></canvas>
-      <div class="foot-note" style="margin:8px -18px -8px">Goal: green climbing toward 1.35, red settling on zero.</div>
+      <div class="foot-note" style="margin:8px -18px -8px">Red should settle on the dashed zero line; green should climb. Points appear only for sessions with shot-level rows in shots.csv.</div>
     </div>
   </section>
 
@@ -266,9 +266,16 @@
       .map(k=>({label:SURF_LABEL[k]||k, n:c[k], note:latest}));
   })();
 
+  const TREND_BY_DATE={}; DATA.trend.forEach(t=>{TREND_BY_DATE[t.date]=t;});
   const SESSION_SEEDS = DATA.sessions.map(s=>({
     date:s.session_date, type:s.description||s.type,
-    key_stats:{}, fault:s.diagnosis,
+    key_stats: TREND_BY_DATE[s.session_date]
+      ? {face_avg:TREND_BY_DATE[s.session_date].face_avg,
+         face_sd:TREND_BY_DATE[s.session_date].face_sd,
+         smash:TREND_BY_DATE[s.session_date].smash_avg,
+         shots:TREND_BY_DATE[s.session_date].n}
+      : {},
+    fault:s.diagnosis,
     drills:(s.drills||'').split(';').filter(Boolean), notes:s.notes}));
 
   const SGT_SEEDS = DATA.rounds.map(r=>({
@@ -336,10 +343,10 @@
     const allDates=[...sess.map(x=>x.date), ...rounds.map(x=>x.date)].sort();
     const latest=allDates[allDates.length-1];
     $('headSub').textContent=sess.length+' session'+(sess.length===1?'':'s')+' \u00B7 '+rounds.length+' SGT round'+(rounds.length===1?'':'s')+' \u00B7 last activity: '+fmt(latest);
-    const k=l.key_stats||{};
-    const st=[[k.iron_smash?k.iron_smash.toFixed(2):'\u2013','Iron smash'],
-              [k.long_offline_m!=null?(k.long_offline_m>0?'+':'')+k.long_offline_m+'m':'\u2013','Avg miss'],
-              [rounds.length?rounds[rounds.length-1].gross:'\u2013','Last SGT 9']];
+    const last=DATA.trend[DATA.trend.length-1]||{};
+    const st=[[last.face_avg!=null?(last.face_avg>0?'+':'')+last.face_avg.toFixed(2)+'\u00B0':'\u2013','Face avg'],
+              [last.face_sd!=null?last.face_sd.toFixed(2)+'\u00B0':'\u2013','Face spread'],
+              [rounds.length?(rounds[rounds.length-1].gross||'\u2013'):'\u2013','Last SGT 9']];
     $('headStats').innerHTML=st.map(([n,l])=>'<div class="hs"><div class="n">'+n+'</div><div class="l">'+l+'</div></div>').join('');
   }
 
@@ -408,10 +415,11 @@
   function sessions(list){
     $('sessSlot').innerHTML=list.slice().reverse().map(s=>{
       const k=s.key_stats||{};
-      const chips=[k.iron_smash!=null?'<span class="chip">iron smash <b>'+k.iron_smash.toFixed(2)+'</b></span>':'',
-        k.long_offline_m!=null?'<span class="chip">avg miss <b>'+(k.long_offline_m>0?'+':'')+k.long_offline_m+'m</b></span>':'',
-        k.driver_avg_carry_m!=null?'<span class="chip">driver <b>'+k.driver_avg_carry_m+'m</b></span>':'',
-        k.wedge_smash!=null?'<span class="chip">wedge smash <b>'+k.wedge_smash.toFixed(2)+'</b></span>':''].join('');
+      const chips=[k.shots!=null?'<span class="chip">shots <b>'+k.shots+'</b></span>':'',
+        k.face_avg!=null?'<span class="chip">face avg <b>'+(k.face_avg>0?'+':'')+k.face_avg.toFixed(2)+'\u00B0</b></span>':'',
+        k.face_sd!=null?'<span class="chip">spread <b>'+k.face_sd.toFixed(2)+'\u00B0</b></span>':'',
+        k.smash!=null?'<span class="chip">smash <b>'+k.smash.toFixed(2)+'</b></span>':'',
+        (k.shots==null?'<span class="chip" style="border-color:#E4C4BC;color:#7A3226">no shot rows logged yet</span>':'')].join('');
       const dr=(s.drills||s.drills_given||[]);
       return '<div class="item"><div class="ihead"><span class="idate">'+fmt(s.date)+'</span><span class="itype">'+esc(s.type||'')+'</span></div>'+
         '<div class="ibody">'+
@@ -452,26 +460,32 @@
     }).join('')||'<div class="state">No SGT rounds yet.</div>';
   }
 
-  function chart(sess){
-    const cv=$('trend'), dpr=window.devicePixelRatio||1, W=cv.clientWidth||800, H=220;
+  function chart(){
+    const cv=$('trend'); if(!cv) return;
+    const pts=DATA.trend.filter(t=>t.face_avg!=null||t.smash_avg!=null);
+    const dpr=window.devicePixelRatio||1, W=cv.clientWidth||800, H=220;
     cv.width=W*dpr; cv.height=H*dpr; const g=cv.getContext('2d'); g.scale(dpr,dpr); g.clearRect(0,0,W,H);
-    const pl=42,pr=44,pt=16,pb=30,pw=W-pl-pr,ph=H-pt-pb;
-    const pts=sess.map(s=>({date:s.date,sm:s.key_stats?s.key_stats.iron_smash:null,off:s.key_stats?s.key_stats.long_offline_m:null}));
-    const n=pts.length, X=i=>n===1?pl+pw/2:pl+pw*i/(n-1);
-    const Y1=v=>pt+ph*(1-(v-0.9)/0.6), Y2=v=>pt+ph*(1-(v+20)/60);
+    const pl=46,pr=46,pt=16,pb=30,pw=W-pl-pr,ph=H-pt-pb;
+    const n=pts.length, X=i=>n<=1?pl+pw/2:pl+pw*i/(n-1);
+    const Y1=v=>pt+ph*(1-(v+2)/10);      // face avg, -2 to +8 deg
+    const Y2=v=>pt+ph*(1-(v-1.0)/0.5);   // smash, 1.0 to 1.5
     g.strokeStyle='#E4E8E0'; g.lineWidth=1; g.font='10px "IBM Plex Mono", monospace';
-    [1.0,1.2,1.4].forEach(v=>{const y=Y1(v);g.beginPath();g.moveTo(pl,y);g.lineTo(W-pr,y);g.stroke();
-      g.fillStyle='#1F5C3D';g.textAlign='right';g.fillText(v.toFixed(1),pl-6,y+3)});
-    [0,20].forEach(v=>{const y=Y2(v);g.fillStyle='#C2452D';g.textAlign='left';g.fillText((v>0?'+':'')+v+'m',W-pr+6,y+3)});
-    g.strokeStyle='rgba(194,69,45,.25)';g.setLineDash([4,4]);g.beginPath();g.moveTo(pl,Y2(0));g.lineTo(W-pr,Y2(0));g.stroke();g.setLineDash([]);
-    const draw=(get,Y,col)=>{const v=pts.map((p,i)=>({v:get(p),i})).filter(p=>p.v!=null);if(!v.length)return;
-      g.strokeStyle=col;g.lineWidth=2;g.beginPath();v.forEach((p,k)=>{const x=X(p.i),y=Y(p.v);k?g.lineTo(x,y):g.moveTo(x,y)});
+    [0,3,6].forEach(v=>{const y=Y1(v);g.beginPath();g.moveTo(pl,y);g.lineTo(W-pr,y);g.stroke();
+      g.fillStyle='#C2452D';g.textAlign='right';g.fillText((v>0?'+':'')+v+'\u00B0',pl-6,y+3);});
+    [1.1,1.3].forEach(v=>{const y=Y2(v);g.fillStyle='#1F5C3D';g.textAlign='left';g.fillText(v.toFixed(1),W-pr+6,y+3);});
+    g.strokeStyle='rgba(31,92,61,.28)'; g.setLineDash([4,4]);
+    g.beginPath(); g.moveTo(pl,Y1(0)); g.lineTo(W-pr,Y1(0)); g.stroke(); g.setLineDash([]);
+    const draw=(get,Y,col)=>{const v=pts.map((p,i)=>({v:get(p),i})).filter(p=>p.v!=null);
+      if(!v.length) return;
+      g.strokeStyle=col;g.lineWidth=2;g.beginPath();
+      v.forEach((p,k)=>{const x=X(p.i),y=Y(p.v);k?g.lineTo(x,y):g.moveTo(x,y);});
       if(v.length>1)g.stroke();
       v.forEach(p=>{const x=X(p.i),y=Y(p.v);g.fillStyle=col;g.beginPath();g.arc(x,y,4,0,7);g.fill();
-        g.fillStyle='#fff';g.beginPath();g.arc(x,y,1.8,0,7);g.fill()})};
-    draw(p=>p.sm,Y1,'#1F5C3D'); draw(p=>p.off,Y2,'#C2452D');
+        g.fillStyle='#fff';g.beginPath();g.arc(x,y,1.8,0,7);g.fill();});};
+    draw(p=>p.face_avg,Y1,'#C2452D');
+    draw(p=>p.smash_avg,Y2,'#1F5C3D');
     g.fillStyle='#56635C';g.textAlign='center';
-    pts.forEach((p,i)=>{const[,m,d]=p.date.split('-');g.fillText(d+'/'+m,X(i),H-10)});
+    pts.forEach((p,i)=>{const[,m,d]=p.date.split('-');g.fillText(d+'/'+m,X(i),H-10);});
   }
 
   // ---------- boot ----------
@@ -493,8 +507,8 @@
     try{
       safe('head',()=>head(SESS,ROUNDS)); safe('focus',focus); safe('face',face);
       safe('deep',deep); safe('bag',bag); safe('ladder',ladder);
-      safe('sessions',()=>sessions(SESS)); safe('surf',surf); safe('sgt',()=>sgt(ROUNDS)); safe('chart',()=>chart(SESS));
-      window.addEventListener('resize',()=>chart(SESS));
+      safe('sessions',()=>sessions(SESS)); safe('surf',surf); safe('sgt',()=>sgt(ROUNDS)); safe('chart',chart);
+      window.addEventListener('resize',chart);
       if(!saved && HAS_STORAGE) $('noticeSlot').innerHTML='<div class="errbox" style="margin-top:24px">Saving to your private log didn\u2019t work just now \u2014 showing a local copy. It\u2019ll save automatically next time you open this.</div>';
     }catch(e){console.error(e);
       $('sessSlot').innerHTML='<div class="errbox">Couldn\u2019t display the log. Reopen to try again \u2014 saved data is unaffected.</div>';}
