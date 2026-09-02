@@ -102,6 +102,47 @@ def write_csv(path, rows):
 SURFACES = ("tee", "fairway", "rough", "deep_rough", "sand", "green", "recovery")
 
 
+# Fields available from each capture type. A blank in a column that the source
+# DOES show means a transcription miss, not a limitation — this is the check that
+# catches "I read the panel but skipped a field".
+FROM_HISTORY = ["carry_m","total_m","offline_m","club_speed_kmh","ball_speed_kmh","smash",
+                "spin_axis_deg","back_spin_rpm","side_spin_rpm","launch_angle_deg",
+                "launch_dir_deg","face_angle_deg","swing_path_deg","face_to_path_deg",
+                "aoa_deg","dyn_loft_deg"]
+FROM_SUMMARY = FROM_HISTORY + ["apex_m","apex_time_s","air_time_s","descent_angle_deg",
+                               "bounce_roll_m","total_spin_rpm","impact_w_mm","impact_h_mm",
+                               "lie_deg","closure_rate_dps"]
+FROM_GSPRO   = FROM_SUMMARY + ["carry_game_m"]
+
+
+def coverage_report(shots):
+    """Per-session fill rate for every metric column.
+
+    Prints anything under 100% so partial transcription is visible immediately
+    instead of surfacing weeks later as a wrong answer.
+    """
+    by_sess = defaultdict(list)
+    for r in shots:
+        by_sess[r.get("session_id") or r["session_date"]].append(r)
+    print("  column coverage (blank = not transcribed or not shown by the source):")
+    for sid in sorted(by_sess):
+        rs = by_sess[sid]
+        ctx = rs[0].get("context") or "practice"
+        expect = FROM_GSPRO if ctx in ("sgt", "play") else FROM_SUMMARY
+        gaps = []
+        for c in expect:
+            filled = sum(1 for r in rs if str(r.get(c) or "").strip() not in ("", "None"))
+            if filled == 0:
+                gaps.append(f"{c}(0)")
+            elif filled < len(rs):
+                gaps.append(f"{c}({filled}/{len(rs)})")
+        if gaps:
+            print(f"    {sid}: " + ", ".join(gaps[:8])
+                  + (f" +{len(gaps)-8} more" if len(gaps) > 8 else ""))
+        else:
+            print(f"    {sid}: complete")
+
+
 def surface_report(shots):
     """Break on-course shots down by the surface they were played from.
 
@@ -230,6 +271,7 @@ def main():
     check_round_join(shots)
     check_descriptions(shots)
     surface_report(shots)
+    coverage_report(shots)
 
     # All-time (everything but drills), plus the most recent session.
     summary = summarise(rng, "all_time")
