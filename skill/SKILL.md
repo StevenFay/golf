@@ -235,12 +235,30 @@ Notes: <how it felt, what was being worked on, anything odd>
    shot's carry beside another's ball speed. If the fields disagree, log nothing
    from it and say so — a wrong number is worse than a missing one.
 
-### Completeness check
+### Completeness check — run this every time
 
-After logging, run `scripts/build.py`. It prints `sessions with no shot-level rows
-yet`. **That list must be empty.** If a session was only partly transcribed, say
-which shots are missing and how many — never imply a round is fully logged when it
-is not.
+After logging, run `scripts/build.py`. It prints two checks:
+
+1. **`sessions with no shot-level rows yet`** — must be empty.
+2. **`column coverage`** — per session, every metric column under 100% fill.
+
+A column showing `(0)` or a partial count is either a limitation of the source or
+a transcription miss, and **you must know which**:
+
+| Source | Provides |
+|---|---|
+| xlsx export (22 Aug style) | carry, total, offline, speeds, smash, spin axis, back/side spin. **No** face, path, launch, AoA, loft, impact, apex, flight shape. |
+| HISTORY tab | the above **plus** launch angle/direction, face angle, swing path, face-to-path, AoA, dynamic loft. **No** impact position, lie, closure, apex, apex time, air time, descent, roll. |
+| SUMMARY panel | everything HISTORY has **plus** apex, apex time, air time, descent angle, bounce/roll, total spin, impact width/height, lie, closure rate. |
+| GSPro round capture | everything above **plus** `carry_game_m` ("CARRY (game)" beside "CARRY (raw)"), spin axis, club lie, hole, par, shot number, club, remaining distance. |
+
+So a blank `apex_m` on a HISTORY-only session is expected; a blank `apex_m` on a
+session logged from SUMMARY captures is a **miss, and must be gone back for**.
+State which it is rather than leaving the reader to guess.
+
+**Known open gaps** (recoverable from captures already sent, not yet transcribed):
+`carry_game_m` on all round shots, `lie_deg` and `spin_axis_deg` on 29 Aug — all
+three are visible on the GSPro left panel of those captures.
 
 ## Progress dashboard
 
