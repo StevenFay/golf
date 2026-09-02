@@ -24,15 +24,82 @@ name on any screenshot before drawing conclusions from the data.
   targets for the whole set.
 - **New irons were incoming** as of 22 Aug. Re-map carries and re-check lie when they
   land; the existing gapping data won't transfer.
+- **Heel-biased contact.** 29 Aug round: `impact_w_mm` negative on nearly every shot,
+  ranging to −30 mm. Combined with toe-down lie, worth checking distance from the ball
+  and lie angle together rather than separately.
+- **Gapping overlaps at the top of the bag.** From the 22 Aug session: 4I, 4H and 3W all
+  carried 170–173 m, and 5I and 6I sat 4 m apart. Three clubs covering one number is a
+  set-composition question, not a swing one.
 
-## Data access
+## Worked example — answering a lie-angle question from the repo
 
-Session data lives in the `StevenFay/golf` repo — `data/shots.csv` (one row per shot,
-with `club_speed_kmh`, `smash`, `lie_deg`, `impact_w_mm`, `impact_h_mm`, `dyn_loft_deg`)
-and `build/club_summary.csv` for per-club aggregates. That's a far better fitting signal
-than a single session, and it's already collected. Note `context=drill` rows are
-excluded from stats and should be excluded from fitting reasoning too — they're
-deliberately partial swings.
+1. Pull `build/club_summary.csv`, scope `all_time`, and read `lie_avg` / `lie_min` /
+   `lie_max` per club.
+2. Cross-check `impact_w_avg`: consistent heel contact with toe-down lie points to the
+   club sitting too upright **or** Steven standing too close — those need separating.
+3. Check `offline_avg` direction: toe-down delivery pushes shots right, which is also
+   his swing miss, so do not attribute the whole bias to the club.
+4. Check the coverage line from `scripts/build.py` before concluding. If `lie_deg` is
+   thin, say how thin.
+5. If the recommendation would cost money, say a proper in-person fitting comes first.
+
+## Data access — GitHub repo `StevenFay/golf`
+
+All of Steven's shot data lives in one repo. This is a far better fitting signal than
+whatever happens to be in the current conversation, and it is already collected.
+
+```
+data/shots.csv       one row per shot, every session, append-only. Source of truth.
+data/sessions.csv    session metadata: description, diagnosis, drills.
+data/rounds.json     SGT rounds with per-hole detail and played-from surfaces.
+raw/                 original exports and screenshots, never edited.
+scripts/build.py     regenerates build/ from shots.csv.
+build/club_summary.csv   per-club aggregates: min/avg/max on every metric.
+build/club_trend.csv     per-club, per-session averages — for spotting drift.
+build/dashboard_data.json  everything the dashboard renders.
+```
+
+**Access:** Steven pastes a GitHub token when he wants writes; it does not persist
+between conversations. Reads can go through the API with that token. If it isn't in the
+current chat, ask for it, or ask him to paste the relevant rows.
+
+### The columns that matter for fitting
+
+| Question | Columns |
+|---|---|
+| Lie angle | `lie_deg` (dynamic lie, **positive = toe down**), `impact_w_mm` (**negative = heel**), `offline_m` |
+| Shaft flex / weight | `club_speed_kmh`, `back_spin_rpm`, `launch_angle_deg`, `dyn_loft_deg` |
+| Length | `impact_w_mm` and `impact_h_mm` scatter, `smash` consistency |
+| Loft / gapping | `carry_m` by club from `build/club_summary.csv`, `dyn_loft_deg`, `descent_angle_deg`, `apex_m` |
+| Strike quality | `smash`, `impact_w_mm`, `impact_h_mm` |
+
+### Rules for reading this data
+
+1. **Exclude what the build excludes.** `context=drill` rows are deliberately partial
+   swings. `exclude_from_stats=1` marks punch-outs, knockdowns and recoveries. Club `P`
+   is putts. None belong in fitting reasoning — and `build/club_summary.csv` has already
+   dropped them, so prefer it over hand-filtering `shots.csv`.
+2. **Use `carry_m`, never `carry_game_m`.** `carry_m` is what ProTee measured from the
+   strike. `carry_game_m` is what GSPro played after applying a lie penalty — from rough
+   that can be 25–38 m shorter. Only `carry_m` reflects the club.
+3. **Every shot is off the same flat mat**, including rounds. So delivery and impact
+   data is directly comparable across `practice`, `sgt` and `play`; there is no
+   "he was in the rough" explanation for a bad lie-angle reading.
+4. **Check coverage before concluding.** `scripts/build.py` prints per-column fill
+   rates. `lie_deg` in particular is only captured on SUMMARY-panel screenshots — as of
+   the last check just 6 of 168 rows have it. A lie recommendation resting on 6 shots
+   from one session must say so.
+5. **Watch for club mislabels.** The sim has logged an entire 9-iron block as 8-iron
+   before, and club assignment on round captures is *inferred* from a club box that runs
+   one shot ahead. Sanity-check carry against the club before trusting it.
+6. **Check the profile.** ProTee Labs carries profiles for both Steven and Amanda.
+   `shots.csv` should be Steven only, but verify on any new screenshot.
+
+### Current data snapshot
+
+Roughly 170 shots across four sessions (22 Aug full-bag gapping, 25 and 26 Aug iron
+blocks, 29 Aug SGT round). Re-read `build/club_summary.csv` rather than trusting these
+figures — they date quickly.
 
 ## Workflow
 
