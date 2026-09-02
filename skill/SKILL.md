@@ -256,9 +256,17 @@ So a blank `apex_m` on a HISTORY-only session is expected; a blank `apex_m` on a
 session logged from SUMMARY captures is a **miss, and must be gone back for**.
 State which it is rather than leaving the reader to guess.
 
-**Known open gaps** (recoverable from captures already sent, not yet transcribed):
-`carry_game_m` on all round shots, `lie_deg` and `spin_axis_deg` on 29 Aug — all
-three are visible on the GSPro left panel of those captures.
+**The GSPro carry column is easy to miss.** On round captures it sits as a vertical
+tile stack around x=0.43–0.47 of the frame: CARRY (game), CARRY (raw), TOTAL LENGTH,
+BALL SPEED, SPIN AXIS, TOTAL SPIN. `carry_game_m` and `spin_axis_deg` come from here
+and from nowhere else. Crop that column for every capture and read it as a batch —
+ball speed matches each tile back to its shot row.
+
+**The measured-vs-played gap is a real coaching signal, not noise.** From 29 Aug:
+a 7-iron measured 128.1 m but played 89.8 m from rough (−38 m); a 3-wood measured
+187.9 m and played 159.2 m (−29 m). Meanwhile shots from clean lies land within a
+metre or two. Quantifying that per surface is genuinely useful for club selection,
+so always capture both carries.
 
 ## Progress dashboard
 
