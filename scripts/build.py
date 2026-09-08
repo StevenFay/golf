@@ -115,6 +115,33 @@ FROM_SUMMARY = FROM_HISTORY + ["apex_m","apex_time_s","air_time_s","descent_angl
 FROM_GSPRO   = FROM_SUMMARY + ["carry_game_m"]
 
 
+def club_provenance_report(shots):
+    """Report how each shot's club was established.
+
+    The sim has mislabelled an entire block before (26 Aug: 45 shots logged as
+    8 iron were 9 iron), and on round captures the club is INFERRED from a GSPro
+    box that runs one shot ahead. `club_as_logged` preserves what the sim showed
+    so a correction can be audited or reversed; `club_source` says how much to
+    trust the value.
+    """
+    by = defaultdict(int)
+    for r in shots:
+        by[r.get("club_source") or "unknown"] += 1
+    print("  club provenance: " + ", ".join(f"{k}={v}" for k, v in sorted(by.items())))
+    corrected = [r for r in shots if r.get("club_source") == "corrected"]
+    if corrected:
+        pairs = defaultdict(int)
+        for r in corrected:
+            pairs[(r.get("club_as_logged"), r["club"])] += 1
+        for (o, n), k in sorted(pairs.items()):
+            print(f"    corrected {o} -> {n} ({k} shots)")
+    inferred = [r for r in shots if r.get("club_source") == "inferred"]
+    if inferred:
+        dates = sorted({r["session_date"] for r in inferred})
+        print(f"    {len(inferred)} shots have an INFERRED club "
+              f"({', '.join(dates)}) - treat per-club stats there as provisional")
+
+
 def coverage_report(shots):
     """Per-session fill rate for every metric column.
 
@@ -272,6 +299,7 @@ def main():
     check_descriptions(shots)
     surface_report(shots)
     coverage_report(shots)
+    club_provenance_report(shots)
 
     # All-time (everything but drills), plus the most recent session.
     summary = summarise(rng, "all_time")
