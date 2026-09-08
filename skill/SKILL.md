@@ -74,6 +74,11 @@ scripts/append.py    schema-checked append of a session CSV
 build/               derived output — disposable
 ```
 
+**The container resets between sessions and sometimes mid-conversation.** The repo is
+the only durable copy — of the data, the scripts, the dashboard template AND these skill
+files (mirrored under `skill/` and `skill-fitting/`). If the working directory is empty,
+pull from GitHub rather than starting over; nothing is lost.
+
 **Access:** Steven pastes a GitHub personal access token when he wants commits. It does
 not persist between conversations — if it isn't in the current chat, still do the
 analysis and dashboard, and say plainly that the commit will need the token. Never
@@ -219,19 +224,24 @@ Notes: <how it felt, what was being worked on, anything odd>
 3. **Build contact sheets.** Crop header + club box + stats grid per shot, stack
    4–6 per image with PIL, and read those. Far faster and more accurate than
    opening 52 full screenshots.
-4. **The GSPro club box is one shot ahead.** It shows the club for the *next* shot
+4. **Record club provenance. Never overwrite a club label without keeping the original.**
+   `club` holds the corrected value, `club_as_logged` preserves what the sim displayed,
+   and `club_source` is `sim` / `corrected` / `inferred`. The sim mislabelled **45 shots
+   as 8 iron on 26 Aug** that were 9 iron; without the original preserved, a wrong
+   correction is undetectable and irreversible. `build.py` prints the breakdown each run.
+5. **The GSPro club box is one shot ahead.** It shows the club for the *next* shot
    while the ProTee panel shows the shot just struck. The header likewise shows the
    upcoming shot number and remaining distance. Verified: hole 10 header read
    "Shot 2, 257.0 m" while SGT's card showed shot 1 finishing 281 yds from the pin.
    **Shift club assignment by one**, and say plainly that club is inferred.
-5. **Cross-check against SGT.** The Shot Data tab gives hole, shot number, distance
+6. **Cross-check against SGT.** The Shot Data tab gives hole, shot number, distance
    and resulting lie for every shot. Use it for `hole` and `surface`, and to verify
    the sequence. `surface` = where the *previous* shot finished; shot 1 is `tee`.
-6. **Log putts** as club `P`. They are excluded from swing stats automatically, but
+7. **Log putts** as club `P`. They are excluded from swing stats automatically, but
    they are real strokes and belong in the round.
-7. **Flag restricted swings** — punch-outs, knockdowns, recoveries — with
+8. **Flag restricted swings** — punch-outs, knockdowns, recoveries — with
    `shot_type` and `exclude_from_stats`. Listen for Steven mentioning them.
-8. **Reject internally inconsistent panels.** A mid-update capture can show one
+9. **Reject internally inconsistent panels.** A mid-update capture can show one
    shot's carry beside another's ball speed. If the fields disagree, log nothing
    from it and say so — a wrong number is worse than a missing one.
 
