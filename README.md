@@ -125,6 +125,26 @@ a hand-written date goes stale the moment someone forgets:
 re-fetches the live file and confirms the stamp is present and the placeholder is
 gone, rather than trusting the API's success response.
 
+## Club provenance
+
+The sim's club label cannot be trusted blindly. On 26 Aug it labelled **45 shots as
+8 iron that were 9 iron**, and 4 as 7 iron that were 8 iron. On round captures there is
+no reliable label at all — the GSPro club box shows the club for the *next* shot, so the
+club is inferred by shifting the sequence by one.
+
+So `club` holds the corrected value, `club_as_logged` preserves what the sim showed, and
+`club_source` records which is which. `build.py` prints the breakdown every run:
+
+```
+club provenance: corrected=49, inferred=36, sim=83
+  corrected 7I -> 8I (4 shots)
+  corrected 8I -> 9I (45 shots)
+  36 shots have an INFERRED club (2026-08-29) - treat per-club stats there as provisional
+```
+
+Without this, a wrong correction would be undetectable and irreversible — the original
+would only be recoverable by re-reading the screenshots.
+
 ## The idea
 
 One long table beats a folder of per-session spreadsheets. Any question
@@ -144,7 +164,9 @@ Everything in `build/` is derived. If it disagrees with `shots.csv`,
 | `session_id` | `{date}-{context}`, plus an optional suffix (`2026-09-01-sgt-r2`). The real session key — **a date is not unique**, since a warm-up block and an SGT round can share a day. Joins to `sessions.csv` / `rounds.json`, where the human `description` lives. |
 | `shot_no` | Shot number as shown by the launch monitor. Gaps are fine. |
 | `time` | `HH:MM:SS`, 24h. |
-| `club` | `DR 3W 4H 4I 5I 6I 7I 8I 9I PW GW SW LW` |
+| `club` | `DR 3W 4H 4I 5I 6I 7I 8I 9I PW GW SW LW`. The **corrected** club — what was actually swung. |
+| `club_as_logged` | What the sim displayed, before any correction. Blank when the club was inferred rather than displayed. |
+| `club_source` | `sim` (the sim's label, trusted), `corrected` (Steven corrected a mislabel), `inferred` (deduced from the GSPro club box, which runs one shot ahead). |
 | `context` | One of `practice`, `sgt`, `play`, `drill`. See below. |
 | `surface` | What the ball was sitting on in GSPro: `tee`, `fairway`, `rough`, `deep_rough`, `sand`, `green`, `recovery`. On-course only. |
 | `shot_type` | `full` (default), or `punch`, `knockdown`, `recovery`, `partial`. Descriptive. |
