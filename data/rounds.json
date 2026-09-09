@@ -565,7 +565,60 @@
       "source_shot_data": "SGT Shot Data tab, scorecard 70106/27782",
       "tee_shots_par45": 6,
       "fairways_hit": 0,
-      "strokes_back_nine": 55
+      "strokes_back_nine": 55,
+      "gross": 55,
+      "net": 55,
+      "to_par": 20,
+      "putts": null,
+      "fir": "0/6",
+      "gir": null,
+      "holes": [
+        {
+          "hole": 10,
+          "par": 4,
+          "strokes": 5
+        },
+        {
+          "hole": 11,
+          "par": 3,
+          "strokes": 4
+        },
+        {
+          "hole": 12,
+          "par": 5,
+          "strokes": 8
+        },
+        {
+          "hole": 13,
+          "par": 4,
+          "strokes": 8
+        },
+        {
+          "hole": 14,
+          "par": 3,
+          "strokes": 4
+        },
+        {
+          "hole": 15,
+          "par": 4,
+          "strokes": 7
+        },
+        {
+          "hole": 16,
+          "par": 4,
+          "strokes": 6
+        },
+        {
+          "hole": 17,
+          "par": 3,
+          "strokes": 7
+        },
+        {
+          "hole": 18,
+          "par": 5,
+          "strokes": 6
+        }
+      ]
     }
   ]
 }
