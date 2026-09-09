@@ -218,6 +218,28 @@ def check_descriptions(shots):
                   f"— add one to sessions.csv")
 
 
+def normalize_round(rd):
+    """Round records have been written with inconsistent field names across
+    sessions (e.g. 'holes' vs 'shot_by_shot', 'gross' vs 'strokes_back_nine',
+    missing 'to_par'). The dashboard has one rendering path, so every round
+    must expose: gross, net, to_par, putts, fir, gir, holes (list of
+    {hole, par, strokes}). Fill these from whatever shape is present rather
+    than requiring every writer to remember the canonical schema.
+    """
+    rd.setdefault("gross", rd.get("strokes_back_nine"))
+    rd.setdefault("net", rd.get("gross"))
+    if rd.get("to_par") is None and rd.get("gross") is not None and rd.get("par"):
+        rd["to_par"] = rd["gross"] - rd["par"]
+    if not rd.get("holes") and rd.get("shot_by_shot"):
+        rd["holes"] = [{"hole": h.get("hole"), "par": h.get("par"), "strokes": h.get("strokes")}
+                        for h in rd["shot_by_shot"]]
+    if rd.get("fir") is None and rd.get("fairways_hit") is not None and rd.get("tee_shots_par45"):
+        rd["fir"] = f"{rd['fairways_hit']}/{rd['tee_shots_par45']}"
+    rd.setdefault("putts", None)
+    rd.setdefault("gir", None)
+    return rd
+
+
 def check_round_join(shots):
     """Warn if round shots don't line up with rounds.json.
 
@@ -229,7 +251,7 @@ def check_round_join(shots):
     if not os.path.exists(path):
         return
     with open(path) as f:
-        rounds = json.load(f).get("rounds", [])
+        rounds = [normalize_round(r) for r in json.load(f).get("rounds", [])]
     by_date = {r["date"]: {h["hole"] for h in r.get("holes", [])} for r in rounds}
 
     ROUND_CTX = ("sgt", "play")
@@ -500,7 +522,7 @@ def dashboard_payload(shots):
             sessions = list(csv.DictReader(f))
     if os.path.exists(rpath):
         with open(rpath) as f:
-            rounds = json.load(f).get("rounds", [])
+            rounds = [normalize_round(r) for r in json.load(f).get("rounds", [])]
 
     logged = {r["session_date"] for r in shots}
     return {"generated": datetime.now(timezone.utc).strftime("%d %b %Y %H:%M UTC"),
