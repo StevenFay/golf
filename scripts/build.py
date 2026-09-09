@@ -198,6 +198,12 @@ def check_descriptions(shots):
 
     A session without a human label is unidentifiable a month later, so this
     warns rather than letting it slip through silently.
+
+    Also checks that sessions/rounds keep `notes` (coaching, shown on the
+    dashboard) separate from `data_notes` (capture/transcription bookkeeping,
+    dashboard-internal only). A session with real content in data_notes but
+    none in notes usually means the split didn't happen and everything is
+    still piled into one field.
     """
     path = os.path.join(DATA, "sessions.csv")
     described = {}
@@ -216,6 +222,18 @@ def check_descriptions(shots):
         if not described.get(sid):
             print(f"  WARNING session {sid or '(blank)'} has no description "
                   f"— add one to sessions.csv")
+
+    # notes/data_notes split check
+    path = os.path.join(DATA, "sessions.csv")
+    if os.path.exists(path):
+        with open(path, newline="") as f:
+            for r in csv.DictReader(f):
+                notes = (r.get("notes") or "").strip()
+                dnotes = (r.get("data_notes") or "").strip()
+                if dnotes and not notes:
+                    print(f"  WARNING {r.get('session_id')}: has data_notes but no "
+                          f"notes — split may not have happened, check it isn't all "
+                          f"transcription bookkeeping with no coaching content")
 
 
 def normalize_round(rd):
