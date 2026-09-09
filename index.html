@@ -285,17 +285,19 @@
 
   function sgt(rounds){
     $('sgtSlot').innerHTML = rounds.slice().reverse().map(r=>{
-      const gross = r.strokes_back_nine || r.gross;
+      const gross = r.gross!=null ? r.gross : r.strokes_back_nine;
       const toPar = r.to_par!=null ? (r.to_par>0?'+'+r.to_par:(r.to_par===0?'E':r.to_par)) : '\u2013';
-      const holes = (r.shot_by_shot||[]).map((h,i)=>{
-        const d=h.strokes-h.par;
+      const holes = (r.holes||[]).map((h,i)=>{
+        const strokes = h.strokes!=null ? h.strokes : h.score;
+        if(strokes==null || h.par==null) return '';
+        const d=strokes-h.par;
         const c = d<=-1?'birdie':d===0?'par':d===1?'bogey':'double';
-        return '<div class="hole '+c+'"><div class="hn">'+(h.hole!=null?h.hole:i+1)+'</div><div class="hsc">'+h.strokes+'</div></div>';
+        return '<div class="hole '+c+'"><div class="hn">'+(h.hole!=null?h.hole:i+1)+'</div><div class="hsc">'+strokes+'</div></div>';
       }).join('');
       const chips=[
         gross!=null?'<span class="chip">gross <b>'+gross+' ('+toPar+')</b></span>':'',
         r.putts!=null?'<span class="chip">putts <b>'+r.putts+'</b></span>':'',
-        (r.fairways_hit!=null && r.tee_shots_par45!=null)?'<span class="chip">FIR <b>'+r.fairways_hit+'/'+r.tee_shots_par45+'</b></span>':''
+        r.fir?'<span class="chip">FIR <b>'+r.fir+'</b></span>':''
       ].filter(Boolean).join('');
       return '<div class="item"><div class="ihead"><span class="idate">'+fmt(r.date)+'</span>'+
         '<span class="itype">'+esc(r.event||'')+(r.round?' \u00B7 '+esc(r.round):'')+'</span></div>'+
