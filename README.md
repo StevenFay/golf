@@ -235,6 +235,25 @@ screen showed, then run the same two commands. Set `source` to
 
 Then add a row to `sessions.csv` with the diagnosis and drills, and commit.
 
+## `notes` vs `data_notes`
+
+Sessions (`sessions.csv`) and rounds (`rounds.json`) each carry **two** free-text
+fields, and they are not interchangeable:
+
+- **`notes`** — golf. What happened, what it means, points of interest. **This is
+  the one the dashboard shows.**
+- **`data_notes`** — capture and transcription bookkeeping: which screenshots were
+  used, club labels that had to be corrected, rows excluded as sensor garbage,
+  reconciliation against the sim's own averages, anything about *how* the data was
+  gathered rather than what it says about the golf. **Dashboard-internal only** —
+  useful context for the next transcription pass, not something Steven needs to
+  read every time he opens the dashboard.
+
+When writing a session, ask: would this sentence help a coach, or would it only
+help someone re-reading the screenshots later? Route it accordingly. `build.py`
+warns if a session has `data_notes` but no `notes` at all, since that usually means
+the split didn't happen.
+
 ## Reading it
 
 ```python
