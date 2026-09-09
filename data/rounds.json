@@ -110,7 +110,8 @@
       "notes": "First competitive 9 on SGT. Short game carried the round: holed 18ft (h5), 13ft (h6) and two 6-footers (h7, h9), lagged 38ft and 26ft to tap-in range. Wedges into greens were sharp: 35yd to 6ft, 42yd to 9ft, 26yd to 8ft. Nearly every long shot found rough. Blow-ups on holes 1 and 8 were compounded long-club misses, matching the open-face pattern from sim data.",
       "source": "scorecard_screenshot",
       "session_id": "2026-08-24-sgt",
-      "description": "SGT Tour Championship [Web] Round 1, front nine at Trosper Golf Club"
+      "description": "SGT Tour Championship [Web] Round 1, front nine at Trosper Golf Club",
+      "data_notes": ""
     },
     {
       "session_id": "2026-08-29-sgt",
@@ -156,7 +157,7 @@
           "note": "8 iron topped - carry 0, impact 30.4mm low on the face, face 11.8 deg open. Quadruple."
         }
       ],
-      "notes": "Steven's own summary: 'hindenburg'. Finished +27 having started the nine at +8. Dominated by topped long clubs, not by the face-control fault. Full shot-level rows pending a second reading pass over the 52 captures.",
+      "notes": "Steven's own summary: 'hindenburg'. Not one fairway hit off the tee on the par 4s and 5s - only 3 shots all nine were played from a fairway, against 20 from rough. Topped 3 woods off the tee (57, 59, 64 yds) guaranteed a scramble before the second shot. Hole 17: tee shot into deep rough, then 25 yds backwards to a tee box, seven on a par 3. Short game held up: 19 putts, holed from 6 and 7 ft.",
       "source": "gspro_protee_screencaps",
       "pending_exclusions": [
         {
@@ -627,7 +628,8 @@
           "par": 5,
           "strokes": 6
         }
-      ]
+      ],
+      "data_notes": "SGT Shot Data tab (scorecard 70106/27782) supplied hole numbers and played-from surfaces. On-screen finish read +27 while the shot data totals +20 for the nine - gimmie handling likely differs between the two views; neither treated as sole authority. Hole 16 shot 3 (21 yds) flagged as a punch-out from behind a tree, excluded from club stats."
     }
   ]
 }
