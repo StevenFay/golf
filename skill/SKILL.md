@@ -148,6 +148,13 @@ yardages) and tournament pressure.
 - `source` records `xlsx_export`, `csv_export`, `screenshot_transcribed` or
   `scorecard_screenshot`, because transcribed rows carry more risk than direct exports.
 - Missing fields stay **empty, never zero** — a blank means the monitor didn't report it.
+- Every session/round has **two** free-text fields, and they are not interchangeable:
+  `notes` is golf — what happened, what it means — and is **shown on the dashboard**.
+  `data_notes` is capture/transcription bookkeeping (club corrections, excluded rows,
+  which screenshots were used, reconciliation against the sim's own averages) and is
+  **dashboard-internal only**. Route each sentence by asking whether it helps a coach
+  or only helps someone re-reading the screenshots later. `build.py` warns if a session
+  has `data_notes` but no `notes` — that means the split didn't happen.
 
 **Adding a session:** write a dated markdown transcription into `raw/`, append rows to
 `shots.csv`, add a `sessions.csv` row, commit the screenshots alongside. Steven now
