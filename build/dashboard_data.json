@@ -1,5 +1,5 @@
 {
- "generated": "09 Sep 2026 03:23 UTC",
+ "generated": "09 Sep 2026 03:32 UTC",
  "face_rows": [
   {
    "session_id": "2026-08-25-practice",
@@ -595,7 +595,8 @@
      "score": 6,
      "putts": 2,
      "fir": true,
-     "gir": false
+     "gir": false,
+     "strokes": 6
     },
     {
      "hole": 2,
@@ -604,7 +605,8 @@
      "score": 5,
      "putts": 3,
      "fir": null,
-     "gir": false
+     "gir": false,
+     "strokes": 5
     },
     {
      "hole": 3,
@@ -613,7 +615,8 @@
      "score": 5,
      "putts": 2,
      "fir": false,
-     "gir": false
+     "gir": false,
+     "strokes": 5
     },
     {
      "hole": 4,
@@ -622,7 +625,8 @@
      "score": 4,
      "putts": 2,
      "fir": null,
-     "gir": false
+     "gir": false,
+     "strokes": 4
     },
     {
      "hole": 5,
@@ -631,7 +635,8 @@
      "score": 4,
      "putts": 1,
      "fir": true,
-     "gir": false
+     "gir": false,
+     "strokes": 4
     },
     {
      "hole": 6,
@@ -640,7 +645,8 @@
      "score": 5,
      "putts": 2,
      "fir": false,
-     "gir": false
+     "gir": false,
+     "strokes": 5
     },
     {
      "hole": 7,
@@ -649,7 +655,8 @@
      "score": 4,
      "putts": 1,
      "fir": false,
-     "gir": false
+     "gir": false,
+     "strokes": 4
     },
     {
      "hole": 8,
@@ -658,7 +665,8 @@
      "score": 7,
      "putts": 2,
      "fir": false,
-     "gir": false
+     "gir": false,
+     "strokes": 7
     },
     {
      "hole": 9,
@@ -667,7 +675,8 @@
      "score": 4,
      "putts": 2,
      "fir": null,
-     "gir": false
+     "gir": false,
+     "strokes": 4
     }
    ],
    "notes": "First competitive 9 on SGT. Short game carried the round: holed 18ft (h5), 13ft (h6) and two 6-footers (h7, h9), lagged 38ft and 26ft to tap-in range. Wedges into greens were sharp: 35yd to 6ft, 42yd to 9ft, 26yd to 8ft. Nearly every long shot found rough. Blow-ups on holes 1 and 8 were compounded long-club misses, matching the open-face pattern from sim data.",
