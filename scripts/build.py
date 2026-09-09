@@ -233,6 +233,12 @@ def normalize_round(rd):
     if not rd.get("holes") and rd.get("shot_by_shot"):
         rd["holes"] = [{"hole": h.get("hole"), "par": h.get("par"), "strokes": h.get("strokes")}
                         for h in rd["shot_by_shot"]]
+    # Per-hole records have also drifted (some use 'score', some 'strokes').
+    # Fix in place so a missing key can't silently render an empty scorecard.
+    for h in rd.get("holes", []):
+        if "strokes" not in h or h["strokes"] is None:
+            if h.get("score") is not None:
+                h["strokes"] = h["score"]
     if rd.get("fir") is None and rd.get("fairways_hit") is not None and rd.get("tee_shots_par45"):
         rd["fir"] = f"{rd['fairways_hit']}/{rd['tee_shots_par45']}"
     rd.setdefault("putts", None)
