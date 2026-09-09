@@ -1,0 +1,17 @@
+{
+  "tag": "Open face + rotation \u2014 full-speed drills",
+  "headline": "The low point and face are both closer to right, but face-to-path still leaks right on average. Half-speed 9-to-3 work isn't sticking, so the prescription shifted to full-speed drills that force rotation rather than ask for it slowly.",
+  "facts": [
+    ["Evidence", "8 Sep session: face-to-path averaged +3.7\u00b0 (6I) and +4.2\u00b0 (7I) \u2014 still leaking right, though the two smoked shots both had face-to-path near zero."],
+    ["Why half-speed hasn't worked", "Slow swings let the hands steer instead of release \u2014 the opposite of what the drill is meant to build. Full-speed drills that force rotation mechanically are the fix."],
+    ["Fitting confound", "Dynamic lie is 7\u20139.5\u00b0 toe down on every club, varies by club so it's real, not a sensor offset. Toe-down bias sits underneath the swing fault \u2014 keep them separate."],
+    ["Proof it's in there", "Best 6-iron: 166.8 m carry, smash 1.42, face-to-path +0.4\u00b0. Best 8-iron: 139.1 m, smash 1.39, face-to-path \u22121.8\u00b0. When it's square, it's genuinely good."]
+  ],
+  "drills": [
+    {"t": "Feet together", "d": "Heels touching, full 8-irons. Forces body rotation to lead since there's no ground to brace against; arms follow."},
+    {"t": "Split grip", "d": "Trail hand 3\u20134 inches down the shaft. Makes flipping the club awkward, so forearms rotate instead of hands."},
+    {"t": "Curve game", "d": "Alternate: 10-yard draw, 10-yard fade, straight. Full speed. Score on whether it curved as intended \u2014 builds face-to-path feel directly."},
+    {"t": "Checkpoint", "d": "Watch face-to-path, not face angle. Target under +2\u00b0, and negative on the draws."}
+  ],
+  "targets": ["Face-to-path < 2\u00b0", "Draws on command: negative f2p", "Smash > 1.35 consistently", "Lie: separate issue, for the fitter"]
+}
